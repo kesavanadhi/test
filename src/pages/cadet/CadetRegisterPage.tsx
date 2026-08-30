@@ -28,6 +28,7 @@ export const CadetRegisterPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Form State
+  const [cadetUsername, setCadetUsername] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -68,7 +69,19 @@ export const CadetRegisterPage: React.FC = () => {
     e.preventDefault();
     setErrorMessage(null);
 
-    // Basic Validations
+    // Validations
+    if (!cadetUsername.trim()) {
+      setErrorMessage('Please create a unique Cadet Username.');
+      return;
+    }
+    if (cadetUsername.trim().length < 3) {
+      setErrorMessage('Cadet Username must be at least 3 characters.');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(cadetUsername.trim())) {
+      setErrorMessage('Username can only contain letters, numbers, underscores (_), hyphens (-), and periods (.).');
+      return;
+    }
     if (!name.trim()) {
       setErrorMessage('Full name is required.');
       return;
@@ -104,6 +117,7 @@ export const CadetRegisterPage: React.FC = () => {
 
     try {
       const res = registerCadet({
+        cadetUsername: cadetUsername.trim(),
         name,
         email,
         phone,
@@ -121,7 +135,7 @@ export const CadetRegisterPage: React.FC = () => {
 
       setSuccessCadetId(res.cadetId);
       setRegisteredCadetName(res.cadet.name);
-      showToast('success', 'Registration Successful!', `Assigned Cadet ID: ${res.cadetId}`);
+      showToast('success', 'Registration Successful!', `Registered as: ${res.cadetId}`);
     } catch (err: any) {
       setErrorMessage(err.message || 'Registration failed. Please check your inputs.');
     }
@@ -139,7 +153,7 @@ export const CadetRegisterPage: React.FC = () => {
             Cadet Enrolment & Registration
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
-            Create your official aspirant account. The platform will automatically assign your unique Cadet ID for CDS & AFCAT mock exams.
+            Create your official aspirant account. Choose your personal Cadet Username to access CDS & AFCAT mock exams.
           </p>
         </div>
 
@@ -153,16 +167,31 @@ export const CadetRegisterPage: React.FC = () => {
 
         {/* Main Form */}
         <form onSubmit={handleRegister} className="p-6 sm:p-10 rounded-3xl bg-navy-900/90 border border-slate-800 space-y-8 shadow-2xl">
-          {/* Section 1: Personal Details */}
+          {/* Section 1: Cadet Username & Personal Details */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
               <User className="w-4 h-4 text-defence-400" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                1. Personal Information
+                1. Cadet Username & Personal Information
               </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-1.5 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-slate-300">Choose Cadet Username *</label>
+                  <span className="text-[10px] text-defence-400 font-mono">You will use this to login</span>
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. arun_warrior, cadet_vikram, NCC_ARUN"
+                  value={cadetUsername}
+                  onChange={(e) => setCadetUsername(e.target.value.replace(/\s+/g, ''))}
+                  className="w-full px-4 py-3 rounded-xl bg-navy-950 border border-defence-500/50 text-gold-400 placeholder-slate-500 focus:outline-none focus:border-defence-400 font-bold font-mono"
+                />
+              </div>
+
               <div className="space-y-1.5 sm:col-span-2">
                 <label className="font-semibold text-slate-300">Full Name *</label>
                 <input
@@ -174,6 +203,7 @@ export const CadetRegisterPage: React.FC = () => {
                   className="w-full px-4 py-3 rounded-xl bg-navy-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-defence-500 font-semibold"
                 />
               </div>
+
 
               <div className="space-y-1.5">
                 <label className="font-semibold text-slate-300">Email Address *</label>
@@ -413,13 +443,13 @@ export const CadetRegisterPage: React.FC = () => {
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-defence-600 to-defence-500 hover:from-defence-500 hover:to-defence-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-defence-950/60 transition-all hover:scale-[1.01] flex items-center justify-center gap-2 border border-defence-400/40"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Complete Registration & Generate Cadet ID</span>
+            <span>Complete Registration & Create Account</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
           <div className="text-center pt-2">
             <p className="text-xs text-slate-400">
-              Already have a Cadet ID?{' '}
+              Already have a Cadet Account?{' '}
               <Link to="/cadet/login" className="text-defence-400 font-bold hover:underline">
                 Cadet Login Here
               </Link>
@@ -428,7 +458,7 @@ export const CadetRegisterPage: React.FC = () => {
         </form>
       </div>
 
-      {/* REGISTRATION SUCCESSFUL MODAL (Requirement #7) */}
+      {/* REGISTRATION SUCCESSFUL MODAL */}
       {successCadetId && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-md bg-navy-900 border-2 border-defence-500/50 rounded-3xl p-8 space-y-6 shadow-2xl text-center animate-slide-up">
@@ -444,13 +474,13 @@ export const CadetRegisterPage: React.FC = () => {
                 Welcome, {registeredCadetName}!
               </h2>
               <p className="text-xs text-slate-300">
-                Your account has been created successfully. Please memorize or save your generated Cadet ID below:
+                Your cadet aspirant profile is active. You can now login using your chosen username below:
               </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-navy-950 border border-defence-500/40 space-y-1 shadow-inner">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Your Official Cadet ID</span>
-              <p className="text-3xl font-black text-defence-400 tracking-widest font-mono select-all">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Your Registered Cadet Username</span>
+              <p className="text-3xl font-black text-gold-400 tracking-wider font-mono select-all">
                 {successCadetId}
               </p>
             </div>
@@ -464,6 +494,7 @@ export const CadetRegisterPage: React.FC = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

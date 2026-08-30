@@ -14,6 +14,8 @@ import { StorageService } from '../utils/storage';
 import { initialLeaderboard } from '../data/mockLeaderboard';
 import { mergeImportedCadets, ImportMode, exportCadetsToCSV, exportCadetsToExcel, exportCadetsToJSON } from '../utils/datasetParser';
 
+import { useAuth } from './AuthContext';
+
 interface DataContextType {
   cadets: Cadet[];
   questions: Question[];
@@ -56,6 +58,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { activeSessions } = useAuth();
   const [cadets, setCadets] = useState<Cadet[]>(() => StorageService.getCadets());
   const [questions, setQuestions] = useState<Question[]>(() => StorageService.getQuestions());
   const [tests, setTests] = useState<MockTest[]>(() => StorageService.getTests());
@@ -63,6 +66,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [submissions, setSubmissions] = useState<TestSubmission[]>(() => StorageService.getSubmissions());
   const [notifications, setNotifications] = useState<PlatformNotification[]>(() => StorageService.getNotifications());
   const [leaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
+
+  // Keep cadets state reactive to registration and dataset updates
+  useEffect(() => {
+    const handleCadetsUpdate = () => {
+      setCadets(StorageService.getCadets());
+    };
+    window.addEventListener('storage', handleCadetsUpdate);
+    window.addEventListener('warrior_cadets_updated', handleCadetsUpdate);
+    return () => {
+      window.removeEventListener('storage', handleCadetsUpdate);
+      window.removeEventListener('warrior_cadets_updated', handleCadetsUpdate);
+    };
+  }, []);
 
   // Sync to LocalStorage on updates
   useEffect(() => {
@@ -85,55 +101,20 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     StorageService.saveSubmissions(submissions);
   }, [submissions]);
 
-  // Dynamically map live sessions strictly from registered cadets only (No fake / ideal person)
-  const simulatedLiveSessions: ActiveSession[] = cadets.map((cadet, idx) => {
-    const isWriting = idx % 2 === 0;
-    const isIdle = idx === 3;
-    const isCompleted = idx === 4;
-    const status: ActiveSession['status'] = isWriting
-      ? 'Writing Test'
-      : isIdle
-      ? 'Idle'
-      : isCompleted
-      ? 'Completed'
-      : 'Online';
+  // Real active sessions from auth context
+  const realActiveSessions = activeSessions.filter((s) => s.status !== 'Logged Out');
 
-    const testName = cadet.targetExam === 'AFCAT'
-      ? (idx % 2 === 0 ? 'AFCAT Mock Test 01' : 'AFCAT Mock Test 02')
-      : (idx % 2 === 0 ? 'CDS Mock Test 01' : 'CDS General Knowledge Mock');
-
-    return {
-      sessionId: `sess-${cadet.cadetId.toLowerCase()}`,
-      cadetId: cadet.cadetId,
-      cadetName: cadet.name,
-      email: cadet.email,
-      college: cadet.college || 'Defence Academy Hub',
-      loginTime: '07:15 PM',
-      lastActiveTime: '07:30 PM',
-      currentPage: isWriting ? 'Live Examination' : isCompleted ? 'Result Scorecard' : 'Cadet Dashboard',
-      currentExam: cadet.targetExam === 'Both' ? 'CDS' : cadet.targetExam,
-      currentTest: isWriting || isCompleted ? testName : undefined,
-      currentQuestion: isWriting ? `Question ${20 + idx * 8}/100` : undefined,
-      totalQuestions: isWriting ? 100 : undefined,
-      answered: isWriting ? 15 + idx * 6 : undefined,
-      unanswered: isWriting ? 85 - idx * 6 : undefined,
-      markedForReview: isWriting ? 2 : undefined,
-      timeRemaining: isWriting ? `${60 - idx * 5}:20` : undefined,
-      score: cadet.bestScore || 80,
-      status,
-      device: 'Desktop Chrome',
-    };
-  });
-
-  // Summary Metrics strictly derived from registered cadets
+  // Summary Metrics strictly derived from real active sessions and real submissions
   const activeCadetsSummary = {
-    totalOnline: cadets.length,
-    writingTest: simulatedLiveSessions.filter((s) => s.status === 'Writing Test').length,
-    browsingDashboard: simulatedLiveSessions.filter((s) => s.status === 'Online').length,
-    idle: simulatedLiveSessions.filter((s) => s.status === 'Idle').length,
+    totalOnline: realActiveSessions.length,
+    writingTest: realActiveSessions.filter((s) => s.status === 'Writing Test').length,
+    browsingDashboard: realActiveSessions.filter((s) => s.status === 'Online').length,
+    idle: realActiveSessions.filter((s) => s.status === 'Idle').length,
     completed: submissions.length,
-    recentlyLoggedOut: 0,
+    recentlyLoggedOut: activeSessions.filter((s) => s.status === 'Logged Out').length,
   };
+
+
 
   // Cadet CRUD
   const addCadet = (cadet: Cadet) => {
@@ -267,7 +248,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         submissions,
         notifications,
         leaderboard,
-        simulatedLiveSessions,
+        simulatedLiveSessions: realActiveSessions,
         activeCadetsSummary,
         addCadet,
         updateCadet,

@@ -23,19 +23,21 @@ export interface ScoreDataPoint {
 }
 
 export const ScoreProgressionChart: React.FC<{ data: ScoreDataPoint[] }> = ({ data }) => {
-  const chartData = data.length > 0 ? data : [
-    { testName: 'Mock 1', percentage: 65, date: '01 Feb' },
-    { testName: 'Mock 2', percentage: 72, date: '05 Feb' },
-    { testName: 'Mock 3', percentage: 68, date: '10 Feb' },
-    { testName: 'Mock 4', percentage: 84, date: '15 Feb' },
-    { testName: 'Mock 5', percentage: 89, date: '20 Feb' },
-    { testName: 'Mock 6', percentage: 94, date: '22 Feb' },
-  ];
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-64 flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-navy-950/60 border border-slate-800/80">
+        <p className="text-xs font-bold text-slate-300">No Mock Test Progress Recorded Yet</p>
+        <p className="text-[11px] text-slate-500 max-w-xs mt-1">
+          Complete a mock test to view your performance progression trajectory graph.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#40916C" stopOpacity={0.8} />
@@ -72,18 +74,21 @@ export const ScoreProgressionChart: React.FC<{ data: ScoreDataPoint[] }> = ({ da
 export const SubjectPerformanceChart: React.FC<{
   data?: { subject: string; accuracy: number; total: number }[];
 }> = ({ data }) => {
-  const chartData = data || [
-    { subject: 'English', accuracy: 88, total: 50 },
-    { subject: 'General Knowledge', accuracy: 74, total: 50 },
-    { subject: 'Elementary Maths', accuracy: 92, total: 50 },
-    { subject: 'Military Aptitude', accuracy: 95, total: 30 },
-    { subject: 'Reasoning', accuracy: 86, total: 40 },
-  ];
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-64 flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-navy-950/60 border border-slate-800/80">
+        <p className="text-xs font-bold text-slate-300">No Subject Accuracy Data Available</p>
+        <p className="text-[11px] text-slate-500 max-w-xs mt-1">
+          Subject-wise strength breakdown will update once mock test submissions are recorded.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
           <XAxis dataKey="subject" stroke="#64748b" tick={{ fontSize: 10 }} />
           <YAxis domain={[0, 100]} stroke="#64748b" tick={{ fontSize: 11 }} />
@@ -108,6 +113,17 @@ export const CorrectWrongDonutChart: React.FC<{
   wrong: number;
   unanswered: number;
 }> = ({ correct, wrong, unanswered }) => {
+  const total = correct + wrong + unanswered;
+
+  if (total === 0) {
+    return (
+      <div className="w-full h-56 flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-navy-950/60 border border-slate-800/80">
+        <p className="text-xs font-bold text-slate-400">No Question Attempts Logged</p>
+        <p className="text-[11px] text-slate-500 mt-1">Accuracy distribution appears after taking tests.</p>
+      </div>
+    );
+  }
+
   const data = [
     { name: 'Correct', value: correct, color: '#40916C' },
     { name: 'Incorrect', value: wrong, color: '#EF4444' },
@@ -149,3 +165,4 @@ export const CorrectWrongDonutChart: React.FC<{
     </div>
   );
 };
+

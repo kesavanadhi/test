@@ -8,11 +8,11 @@ import {
   X,
   BookOpen,
   Trophy,
-  Package,
   ArrowRight,
   UserPlus,
   LogIn,
 } from 'lucide-react';
+
 import { useAuth } from '../../context/AuthContext';
 
 export const Navbar: React.FC = () => {
@@ -47,12 +47,6 @@ export const Navbar: React.FC = () => {
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
             <Link to="/" className="hover:text-white transition-colors">
               Home
-            </Link>
-            <Link to="/cadet/mock-tests" className="hover:text-white transition-colors">
-              Mock Tests
-            </Link>
-            <Link to="/cadet/packages" className="hover:text-white transition-colors">
-              Packages
             </Link>
           </nav>
 
@@ -124,13 +118,9 @@ export const Navbar: React.FC = () => {
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className="hover:text-white">
               Home
             </Link>
-            <Link to="/cadet/mock-tests" onClick={() => setMobileMenuOpen(false)} className="hover:text-white">
-              Explore Mock Tests
-            </Link>
-            <Link to="/cadet/packages" onClick={() => setMobileMenuOpen(false)} className="hover:text-white">
-              Practice Packages
-            </Link>
           </div>
+
+
 
           <div className="pt-4 border-t border-slate-800 space-y-2">
             <Link

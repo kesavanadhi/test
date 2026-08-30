@@ -13,14 +13,21 @@ import {
 } from 'lucide-react';
 import { useExam } from '../../context/ExamContext';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const AnswerReviewPage: React.FC = () => {
   const { latestResult, examQuestions } = useExam();
   const { submissions, questions: allQuestions } = useData();
+  const { cadetUser } = useAuth();
 
   const [filterStatus, setFilterStatus] = useState<'All' | 'Correct' | 'Incorrect' | 'Unanswered'>('All');
 
-  const submission = latestResult?.submission || submissions[0];
+  const cadetSubmissions = submissions.filter(
+    (s) => s.cadetId === cadetUser?.cadetId || s.cadetName === cadetUser?.name
+  );
+
+  const submission = latestResult?.submission || cadetSubmissions[0];
+
 
   // Resolve questions for this submission
   const reviewQuestions = examQuestions.length > 0

@@ -21,7 +21,7 @@ import { useToast } from '../../context/ToastContext';
 import { ActiveSession, Cadet } from '../../types';
 
 export const LiveActivityPage: React.FC = () => {
-  const { simulatedLiveSessions, activeCadetsSummary, cadets } = useData();
+  const { activeCadetsSummary, cadets } = useData();
   const { activeSessions: realActiveSessions, activityLogs, logoutActiveSession } = useAuth();
   const { showToast } = useToast();
 
@@ -30,37 +30,34 @@ export const LiveActivityPage: React.FC = () => {
   const [selectedTestFilter, setSelectedTestFilter] = useState<string | null>(null);
   const [inspectSession, setInspectSession] = useState<ActiveSession | null>(null);
 
-  // Combine real sessions with simulated sessions for high-volume realistic dashboard
-  const combinedSessions: ActiveSession[] = [
-    ...realActiveSessions,
-    ...simulatedLiveSessions.filter((s) => !realActiveSessions.some((r) => r.cadetId === s.cadetId)),
-  ];
+  // Real active sessions only (no fake simulated data)
+  const activeSessions = realActiveSessions.filter((s) => s.status !== 'Logged Out');
 
-  // Test distribution counters dynamically calculated from registered cadets sessions
+  // Test distribution counters dynamically calculated from real active sessions only
   const testDistribution = [
     {
       name: 'AFCAT Mock Test 01',
       exam: 'AFCAT',
-      cadetsCount: combinedSessions.filter((s) => s.currentTest === 'AFCAT Mock Test 01').length,
+      cadetsCount: activeSessions.filter((s) => s.currentTest === 'AFCAT Mock Test 01').length,
     },
     {
       name: 'AFCAT Mock Test 02',
       exam: 'AFCAT',
-      cadetsCount: combinedSessions.filter((s) => s.currentTest === 'AFCAT Mock Test 02').length,
+      cadetsCount: activeSessions.filter((s) => s.currentTest === 'AFCAT Mock Test 02').length,
     },
     {
       name: 'CDS Mock Test 01',
       exam: 'CDS',
-      cadetsCount: combinedSessions.filter((s) => s.currentTest === 'CDS Mock Test 01').length,
+      cadetsCount: activeSessions.filter((s) => s.currentTest === 'CDS Mock Test 01').length,
     },
     {
       name: 'CDS General Knowledge Mock',
       exam: 'CDS',
-      cadetsCount: combinedSessions.filter((s) => s.currentTest === 'CDS General Knowledge Mock').length,
+      cadetsCount: activeSessions.filter((s) => s.currentTest === 'CDS General Knowledge Mock').length,
     },
   ];
 
-  const filteredSessions = combinedSessions.filter((s) => {
+  const filteredSessions = activeSessions.filter((s) => {
     if (statusFilter !== 'All' && s.status !== statusFilter) return false;
     if (selectedTestFilter && s.currentTest !== selectedTestFilter) return false;
     if (searchQuery.trim()) {
@@ -79,6 +76,7 @@ export const LiveActivityPage: React.FC = () => {
     logoutActiveSession(cadetId);
     showToast('info', 'Session Terminated', `Active session for ${name} (${cadetId}) was logged out.`);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -110,8 +108,9 @@ export const LiveActivityPage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="p-4 rounded-2xl bg-navy-900/90 border border-slate-800 shadow-xl">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Cadets</p>
-          <p className="text-2xl sm:text-3xl font-black text-white mt-1">{activeCadetsSummary.totalOnline}</p>
+          <p className="text-2xl sm:text-3xl font-black text-white mt-1">{cadets.length}</p>
         </div>
+
         <div className="p-4 rounded-2xl bg-navy-900/90 border border-slate-800 shadow-xl">
           <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Online Now</p>
           <p className="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">{activeCadetsSummary.totalOnline}</p>
@@ -224,56 +223,65 @@ export const LiveActivityPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {filteredSessions.map((s) => (
-                  <tr key={s.sessionId} className="hover:bg-navy-850/60 transition-colors">
-                    <td className="py-3 px-3">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        s.status === 'Writing Test'
-                          ? 'bg-amber-950 text-amber-300 border border-amber-500/40 animate-pulse'
-                          : s.status === 'Online'
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                          : s.status === 'Completed'
-                          ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
-                          : s.status === 'Idle'
-                          ? 'bg-slate-900 text-slate-400 border border-slate-700'
-                          : 'bg-red-950/40 text-red-400 border border-red-500/30'
-                      }`}>
-                        {s.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 font-mono font-bold text-slate-300">
-                      <button onClick={() => setInspectSession(s)} className="hover:text-defence-300 underline">
-                        {s.cadetId}
-                      </button>
-                    </td>
-                    <td className="py-3 px-4 font-bold text-white truncate max-w-[130px]">{s.cadetName}</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
-                        {s.currentExam || 'CDS'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-300 truncate max-w-[150px]">{s.currentTest || s.currentPage}</td>
-                    <td className="py-3 px-3 font-mono text-slate-400">{s.currentQuestion || '—'}</td>
-                    <td className="py-3 px-3 font-mono text-amber-400 font-bold">{s.timeRemaining || '—'}</td>
-                    <td className="py-3 px-3 text-right space-x-1.5">
-                      <button
-                        onClick={() => setInspectSession(s)}
-                        className="p-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white transition-all inline-block"
-                        title="Inspect Live Session Details"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleRemoteLogout(s.cadetId, s.cadetName)}
-                        className="p-1 rounded bg-navy-800 hover:bg-red-950 text-slate-400 hover:text-red-400 transition-all inline-block"
-                        title="Terminate Active Session"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                      </button>
+                {filteredSessions.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-slate-500 text-xs">
+                      No active cadet sessions currently online. Live telemetry updates automatically when cadets log in or start tests.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredSessions.map((s) => (
+                    <tr key={s.sessionId} className="hover:bg-navy-850/60 transition-colors">
+                      <td className="py-3 px-3">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          s.status === 'Writing Test'
+                            ? 'bg-amber-950 text-amber-300 border border-amber-500/40 animate-pulse'
+                            : s.status === 'Online'
+                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
+                            : s.status === 'Completed'
+                            ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
+                            : s.status === 'Idle'
+                            ? 'bg-slate-900 text-slate-400 border border-slate-700'
+                            : 'bg-red-950/40 text-red-400 border border-red-500/30'
+                        }`}>
+                          {s.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono font-bold text-slate-300">
+                        <button onClick={() => setInspectSession(s)} className="hover:text-defence-300 underline">
+                          {s.cadetId}
+                        </button>
+                      </td>
+                      <td className="py-3 px-4 font-bold text-white truncate max-w-[130px]">{s.cadetName}</td>
+                      <td className="py-3 px-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
+                          {s.currentExam || 'CDS'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-300 truncate max-w-[150px]">{s.currentTest || s.currentPage}</td>
+                      <td className="py-3 px-3 font-mono text-slate-400">{s.currentQuestion || '—'}</td>
+                      <td className="py-3 px-3 font-mono text-amber-400 font-bold">{s.timeRemaining || '—'}</td>
+                      <td className="py-3 px-3 text-right space-x-1.5">
+                        <button
+                          onClick={() => setInspectSession(s)}
+                          className="p-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white transition-all inline-block"
+                          title="Inspect Live Session Details"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleRemoteLogout(s.cadetId, s.cadetName)}
+                          className="p-1 rounded bg-navy-800 hover:bg-red-950 text-slate-400 hover:text-red-400 transition-all inline-block"
+                          title="Terminate Active Session"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
+
             </table>
           </div>
         </div>

@@ -37,14 +37,12 @@ export const CadetManagement: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
-  const [packageFilter, setPackageFilter] = useState<string>('All');
   const [selectedCadet, setSelectedCadet] = useState<Cadet | null>(null);
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
 
   const filteredCadets = cadets.filter((c) => {
     if (statusFilter !== 'All' && c.status !== statusFilter) return false;
-    if (packageFilter !== 'All' && c.packageId !== packageFilter && c.packageName !== packageFilter) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -58,6 +56,7 @@ export const CadetManagement: React.FC = () => {
     }
     return true;
   });
+
 
   const toggleStatus = (cadet: Cadet) => {
     const nextStatus = cadet.status === 'Active' ? 'Disabled' : 'Active';
@@ -147,18 +146,6 @@ export const CadetManagement: React.FC = () => {
             <option value="Active">Active</option>
             <option value="Disabled">Disabled</option>
           </select>
-
-          <select
-            value={packageFilter}
-            onChange={(e) => setPackageFilter(e.target.value)}
-            className="px-3.5 py-2 rounded-xl bg-navy-950 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-defence-500"
-          >
-            <option value="All">All Packages</option>
-            <option value="Free Mock Test">Free Mock Test</option>
-            <option value="CDS Practice Pack">CDS Practice Pack</option>
-            <option value="AFCAT Practice Pack">AFCAT Practice Pack</option>
-            <option value="Complete Defence Pack">Complete Defence Pack</option>
-          </select>
         </div>
       </div>
 
@@ -173,7 +160,7 @@ export const CadetManagement: React.FC = () => {
                 <th className="py-4 px-6">Email / Phone</th>
                 <th className="py-4 px-6">College / Department</th>
                 <th className="py-4 px-4">Reg No</th>
-                <th className="py-4 px-4">Package</th>
+                <th className="py-4 px-4">Exam</th>
                 <th className="py-4 px-4">Mocks Done</th>
                 <th className="py-4 px-4">Avg Score</th>
                 <th className="py-4 px-4">Status</th>
@@ -181,75 +168,84 @@ export const CadetManagement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filteredCadets.map((c) => (
-                <tr key={c.id} className="hover:bg-navy-850/60 transition-colors">
-                  <td className="py-4 px-6 font-mono font-bold text-defence-400">
-                    <button
-                      onClick={() => handleOpenDetailDrawer(c)}
-                      className="hover:underline flex items-center gap-1 text-left"
-                    >
-                      {c.cadetId}
-                    </button>
-                  </td>
-                  <td className="py-4 px-6 font-bold text-white">
-                    <button onClick={() => handleOpenDetailDrawer(c)} className="hover:text-defence-300">
-                      {c.name}
-                    </button>
-                  </td>
-                  <td className="py-4 px-6 text-slate-400">
-                    <p className="text-slate-300">{c.email}</p>
-                    <p className="text-[10px] text-slate-500">{c.phone}</p>
-                  </td>
-                  <td className="py-4 px-6 text-slate-300 max-w-xs">
-                    <p className="font-semibold text-white truncate">{c.college || '—'}</p>
-                    <p className="text-[10px] text-slate-400">{c.department ? `${c.department} • Year ${c.year || '3'}` : '—'}</p>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-slate-400">{c.registerNumber || '—'}</td>
-                  <td className="py-4 px-4">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-navy-950 text-gold-400 border border-amber-500/30 truncate max-w-[130px] inline-block">
-                      {c.packageName}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 font-bold text-white">{c.testsCompleted}</td>
-                  <td className="py-4 px-4 font-bold text-defence-400">{c.averageScore}%</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      c.status === 'Active'
-                        ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
-                        : 'bg-red-950 text-red-400 border border-red-500/30'
-                    }`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    <button
-                      onClick={() => handleOpenDetailDrawer(c)}
-                      className="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-200 font-semibold text-[11px] transition-all"
-                      title="View Full Profile & Performance"
-                    >
-                      Profile
-                    </button>
-                    <button
-                      onClick={() => handleOpenAccessModal(c)}
-                      className="px-2.5 py-1 rounded bg-defence-950 hover:bg-defence-900 text-defence-300 border border-defence-500/30 font-semibold text-[11px] transition-all"
-                      title="Manage Mock Test Access"
-                    >
-                      Access
-                    </button>
-                    <button
-                      onClick={() => toggleStatus(c)}
-                      className={`px-2.5 py-1 rounded font-semibold text-[11px] transition-all ${
-                        c.status === 'Active'
-                          ? 'bg-red-950/60 hover:bg-red-900 text-red-300'
-                          : 'bg-defence-950 hover:bg-defence-800 text-defence-300'
-                      }`}
-                    >
-                      {c.status === 'Active' ? 'Disable' : 'Enable'}
-                    </button>
+              {filteredCadets.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="py-12 text-center text-slate-500 text-xs">
+                    No registered cadets found. Upload dataset or add cadets to populate the directory.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredCadets.map((c) => (
+                  <tr key={c.id} className="hover:bg-navy-850/60 transition-colors">
+                    <td className="py-4 px-6 font-mono font-bold text-defence-400">
+                      <button
+                        onClick={() => handleOpenDetailDrawer(c)}
+                        className="hover:underline flex items-center gap-1 text-left"
+                      >
+                        {c.cadetId}
+                      </button>
+                    </td>
+                    <td className="py-4 px-6 font-bold text-white">
+                      <button onClick={() => handleOpenDetailDrawer(c)} className="hover:text-defence-300">
+                        {c.name}
+                      </button>
+                    </td>
+                    <td className="py-4 px-6 text-slate-400">
+                      <p className="text-slate-300">{c.email}</p>
+                      <p className="text-[10px] text-slate-500">{c.phone}</p>
+                    </td>
+                    <td className="py-4 px-6 text-slate-300 max-w-xs">
+                      <p className="font-semibold text-white truncate">{c.college || '—'}</p>
+                      <p className="text-[10px] text-slate-400">{c.department ? `${c.department} • Year ${c.year || '3'}` : '—'}</p>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-slate-400">{c.registerNumber || '—'}</td>
+                    <td className="py-4 px-4">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
+                        {c.targetExam || 'CDS'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 font-bold text-white">{c.testsCompleted}</td>
+                    <td className="py-4 px-4 font-bold text-defence-400">{c.averageScore}%</td>
+                    <td className="py-4 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        c.status === 'Active'
+                          ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
+                          : 'bg-red-950 text-red-400 border border-red-500/30'
+                      }`}>
+                        {c.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <button
+                        onClick={() => handleOpenDetailDrawer(c)}
+                        className="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-200 font-semibold text-[11px] transition-all"
+                        title="View Full Profile & Performance"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => handleOpenAccessModal(c)}
+                        className="px-2.5 py-1 rounded bg-defence-950 hover:bg-defence-900 text-defence-300 border border-defence-500/30 font-semibold text-[11px] transition-all"
+                        title="Manage Mock Test Access"
+                      >
+                        Access
+                      </button>
+                      <button
+                        onClick={() => toggleStatus(c)}
+                        className={`px-2.5 py-1 rounded font-semibold text-[11px] transition-all ${
+                          c.status === 'Active'
+                            ? 'bg-red-950/60 hover:bg-red-900 text-red-300'
+                            : 'bg-defence-950 hover:bg-defence-800 text-defence-300'
+                        }`}
+                      >
+                        {c.status === 'Active' ? 'Disable' : 'Enable'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
+
           </table>
         </div>
       </div>
@@ -301,19 +297,20 @@ export const CadetManagement: React.FC = () => {
               </div>
             </div>
 
-            {/* 3. Package & Account Status */}
+            {/* 3. Exam & Account Status */}
             <div className="space-y-3 p-4 rounded-2xl bg-navy-950 border border-slate-800 text-xs">
               <h3 className="font-bold text-white uppercase tracking-wider text-[11px] text-slate-300 border-b border-slate-800 pb-2 flex items-center gap-2">
                 <Shield className="w-3.5 h-3.5 text-defence-400" />
-                <span>Enrolled Package & Permissions</span>
+                <span>Examination Profile & Permissions</span>
               </h3>
               <div className="grid grid-cols-2 gap-2 text-slate-300">
-                <div><span className="text-slate-500 block">Active Package:</span> <strong className="text-gold-400">{selectedCadet.packageName}</strong></div>
+                <div><span className="text-slate-500 block">Target Exam:</span> <strong className="text-gold-400">{selectedCadet.targetExam}</strong></div>
                 <div><span className="text-slate-500 block">Account Status:</span> <strong className="text-defence-400">{selectedCadet.status}</strong></div>
                 <div><span className="text-slate-500 block">Tests Available:</span> {selectedCadet.testsAvailable}</div>
                 <div><span className="text-slate-500 block">Tests Completed:</span> {selectedCadet.testsCompleted}</div>
               </div>
             </div>
+
 
             {/* 4. Performance Snapshot */}
             <div className="grid grid-cols-3 gap-3 text-center">

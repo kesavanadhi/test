@@ -1,12 +1,28 @@
 import React from 'react';
-import { User, Mail, Phone, Shield, Award, Calendar, Package, FileCheck2, Trophy, Clock } from 'lucide-react';
+import { User, Mail, Phone, Shield, Award, Calendar, FileCheck2, Trophy, Clock } from 'lucide-react';
+
 import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 import { formatDate } from '../../utils/formatters';
+
 
 export const CadetProfilePage: React.FC = () => {
   const { cadetUser } = useAuth();
+  const { submissions } = useData();
 
   if (!cadetUser) return null;
+
+  const cadetSubmissions = submissions.filter(
+    (s) => s.cadetId === cadetUser.cadetId || s.cadetName === cadetUser.name
+  );
+
+  const testsCompletedCount = cadetSubmissions.length;
+  const avgScore = testsCompletedCount > 0
+    ? Math.round((cadetSubmissions.reduce((a, b) => a + b.percentage, 0) / testsCompletedCount) * 10) / 10
+    : 0;
+  const highestScore = testsCompletedCount > 0
+    ? Math.max(...cadetSubmissions.map((s) => s.percentage))
+    : 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in py-4">
@@ -31,13 +47,13 @@ export const CadetProfilePage: React.FC = () => {
           </h1>
 
           <p className="text-xs text-slate-300">
-            Registered: {formatDate(cadetUser.registrationDate)} • Package: <strong>{cadetUser.packageName}</strong>
+            Registered: {formatDate(cadetUser.registrationDate)} • Status: <strong className="text-defence-400">{cadetUser.status}</strong>
           </p>
         </div>
 
         <div className="p-4 rounded-2xl bg-navy-950/80 border border-slate-800 text-center">
           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">National Rank</span>
-          <span className="text-3xl font-black text-gold-400">#{cadetUser.rank}</span>
+          <span className="text-3xl font-black text-gold-400">#{cadetUser.rank || 1}</span>
         </div>
       </div>
 
@@ -75,30 +91,31 @@ export const CadetProfilePage: React.FC = () => {
 
         <div className="p-6 rounded-3xl bg-navy-900/90 border border-slate-800 space-y-4 shadow-xl">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 pb-3 border-b border-slate-800 flex items-center gap-2">
-            <Package className="w-4 h-4 text-gold-400" />
-            <span>Subscription & Exam Access</span>
+            <Award className="w-4 h-4 text-gold-400" />
+            <span>Academic & Examination Profile</span>
           </h3>
 
           <div className="space-y-3 text-xs">
             <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Active Package</span>
-              <span className="font-semibold text-gold-400">{cadetUser.packageName}</span>
+              <span className="text-slate-400">Target Exam</span>
+              <span className="font-semibold text-gold-400">{cadetUser.targetExam}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Access Validity</span>
-              <span className="font-semibold text-white">Valid until Dec 2026</span>
+              <span className="text-slate-400">Exam Portal Access</span>
+              <span className="font-semibold text-white">Full Access Active</span>
             </div>
+
             <div className="flex justify-between py-1.5 border-b border-slate-800/60">
               <span className="text-slate-400">Tests Completed</span>
-              <span className="font-semibold text-defence-400">{cadetUser.testsCompleted} Mocks</span>
+              <span className="font-semibold text-defence-400">{testsCompletedCount} Mocks</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-800/60">
               <span className="text-slate-400">Average Percentage</span>
-              <span className="font-semibold text-white">{cadetUser.averageScore}%</span>
+              <span className="font-semibold text-white">{avgScore}%</span>
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-slate-400">Best Score</span>
-              <span className="font-semibold text-defence-400">{cadetUser.bestScore}%</span>
+              <span className="font-semibold text-defence-400">{highestScore}%</span>
             </div>
           </div>
         </div>
@@ -106,3 +123,4 @@ export const CadetProfilePage: React.FC = () => {
     </div>
   );
 };
+

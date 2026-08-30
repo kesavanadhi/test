@@ -18,11 +18,9 @@ import {
   UserPlus,
   LogIn,
 } from 'lucide-react';
-import { PackageCard } from '../../components/packages/PackageCard';
-import { useData } from '../../context/DataContext';
 
 export const LandingPage: React.FC = () => {
-  const { packages } = useData();
+
 
   return (
     <div className="space-y-24 py-6">
@@ -77,7 +75,7 @@ export const LandingPage: React.FC = () => {
           <div className="pt-2 text-xs text-slate-400 flex items-center justify-center gap-4">
             <span>Official Admin Access:</span>
             <Link to="/admin/login" className="text-gold-400 hover:underline font-bold flex items-center gap-1">
-              <span>Admin Login (NCC)</span>
+              <span>Officer Admin Login</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -154,22 +152,6 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. PRACTICE PACKAGES (Requirement #56) */}
-      <section className="max-w-6xl mx-auto px-4 space-y-8">
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-defence-400">Enrolment Options</span>
-          <h2 className="text-3xl font-black text-white font-display">Mock Test Enrolment Packages</h2>
-          <p className="text-xs text-slate-400 max-w-xl mx-auto">
-            Select a tailored mock test bundle designed for intensive preparation and rank acceleration.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {packages.map((pkg) => (
-            <PackageCard key={pkg.id} pkg={pkg} onSelect={() => {}} />
-          ))}
-        </div>
-      </section>
 
       {/* 5. FAQ SECTION */}
       <section className="max-w-4xl mx-auto px-4 space-y-6">

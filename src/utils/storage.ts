@@ -7,17 +7,18 @@ import { initialSubmissions } from '../data/mockResults';
 import { initialNotifications } from '../data/mockNotifications';
 
 const STORAGE_KEYS = {
-  CADETS: 'warrior_cadets_v2',
-  ACTIVE_SESSIONS: 'warrior_active_sessions_v2',
-  ACTIVITY_LOGS: 'warrior_activity_logs_v2',
-  QUESTIONS: 'warrior_questions_v2',
-  TESTS: 'warrior_tests_v2',
-  PACKAGES: 'warrior_packages_v2',
-  SUBMISSIONS: 'warrior_submissions_v2',
-  NOTIFICATIONS: 'warrior_notifications_v2',
-  CADET_AUTH: 'warrior_cadet_auth_v2',
-  ADMIN_AUTH: 'warrior_admin_auth_v2',
+  CADETS: 'warrior_cadets_v3',
+  ACTIVE_SESSIONS: 'warrior_active_sessions_v3',
+  ACTIVITY_LOGS: 'warrior_activity_logs_v3',
+  QUESTIONS: 'warrior_questions_v3',
+  TESTS: 'warrior_tests_v3',
+  PACKAGES: 'warrior_packages_v3',
+  SUBMISSIONS: 'warrior_submissions_v3',
+  NOTIFICATIONS: 'warrior_notifications_v3',
+  CADET_AUTH: 'warrior_cadet_auth_v3',
+  ADMIN_AUTH: 'warrior_admin_auth_v3',
 };
+
 
 export const StorageService = {
   // Cadets

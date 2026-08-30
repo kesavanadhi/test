@@ -31,14 +31,30 @@ export const AdminAnalyticsPage: React.FC = () => {
 
   const totalAttempts = filteredSubmissions.length;
   const passedAttempts = filteredSubmissions.filter((s) => s.passed).length;
-  const passRatio = totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 1000) / 10 : 86.4;
+  const passRatio = totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 1000) / 10 : 0;
   const avgScore = totalAttempts > 0
     ? Math.round((filteredSubmissions.reduce((acc, s) => acc + s.percentage, 0) / totalAttempts) * 10) / 10
-    : 78.5;
+    : 0;
 
-  const totalCorrect = filteredSubmissions.reduce((acc, s) => acc + s.correctCount, 0) || 320;
-  const totalWrong = filteredSubmissions.reduce((acc, s) => acc + s.wrongCount, 0) || 45;
-  const totalUnanswered = filteredSubmissions.reduce((acc, s) => acc + s.unansweredCount, 0) || 15;
+  const totalCorrect = filteredSubmissions.reduce((acc, s) => acc + s.correctCount, 0);
+  const totalWrong = filteredSubmissions.reduce((acc, s) => acc + s.wrongCount, 0);
+  const totalUnanswered = filteredSubmissions.reduce((acc, s) => acc + s.unansweredCount, 0);
+
+  // Subject-wise performance dynamically calculated from submissions
+  const subjectMap = new Map<string, { total: number; correct: number }>();
+  filteredSubmissions.forEach((s) => {
+    const subj = s.subject || s.exam || 'General';
+    const curr = subjectMap.get(subj) || { total: 0, correct: 0 };
+    curr.total += (s.correctCount + s.wrongCount + s.unansweredCount);
+    curr.correct += s.correctCount;
+    subjectMap.set(subj, curr);
+  });
+
+  const subjectPerformanceData = Array.from(subjectMap.entries()).map(([subject, data]) => ({
+    subject,
+    accuracy: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
+    total: data.total,
+  }));
 
   // Chart data from actual submissions
   const scoreProgressionData = filteredSubmissions.slice(0, 10).map((s, idx) => ({
@@ -47,6 +63,7 @@ export const AdminAnalyticsPage: React.FC = () => {
     percentage: s.percentage,
     date: new Date(s.submittedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
   })).reverse();
+
 
   // Export Analytics to Excel
   const handleExportReport = () => {
@@ -180,7 +197,7 @@ export const AdminAnalyticsPage: React.FC = () => {
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">
           Subject-Wise Performance & Accuracy Benchmarks
         </h3>
-        <SubjectPerformanceChart />
+        <SubjectPerformanceChart data={subjectPerformanceData} />
       </div>
 
       {/* Top Cadet Scorers Leaderboard Snapshot */}
@@ -204,28 +221,37 @@ export const AdminAnalyticsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {[...cadets]
-                .sort((a, b) => b.bestScore - a.bestScore)
-                .slice(0, 5)
-                .map((cadet, idx) => (
-                  <tr key={cadet.id} className="hover:bg-navy-800/40">
-                    <td className="py-3 font-bold text-gold-400">#{idx + 1}</td>
-                    <td className="py-3 font-semibold text-white">{cadet.name}</td>
-                    <td className="py-3 font-mono text-slate-400">{cadet.cadetId}</td>
-                    <td className="py-3">
-                      <span className="px-2 py-0.5 rounded bg-navy-950 text-defence-400 border border-defence-600/30 text-[10px] font-bold uppercase">
-                        {cadet.targetExam}
-                      </span>
-                    </td>
-                    <td className="py-3 text-center font-bold">{cadet.testsCompleted}</td>
-                    <td className="py-3 text-right font-mono text-slate-200">{cadet.averageScore}%</td>
-                    <td className="py-3 text-right font-mono font-bold text-defence-400">{cadet.bestScore}%</td>
-                  </tr>
-                ))}
+              {cadets.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-500 text-xs">
+                    No cadet performers registered yet.
+                  </td>
+                </tr>
+              ) : (
+                [...cadets]
+                  .sort((a, b) => b.bestScore - a.bestScore)
+                  .slice(0, 5)
+                  .map((cadet, idx) => (
+                    <tr key={cadet.id} className="hover:bg-navy-850/40">
+                      <td className="py-3 font-bold text-gold-400">#{idx + 1}</td>
+                      <td className="py-3 font-semibold text-white">{cadet.name}</td>
+                      <td className="py-3 font-mono text-slate-400">{cadet.cadetId}</td>
+                      <td className="py-3">
+                        <span className="px-2 py-0.5 rounded bg-navy-950 text-defence-400 border border-defence-600/30 text-[10px] font-bold uppercase">
+                          {cadet.targetExam}
+                        </span>
+                      </td>
+                      <td className="py-3 text-center font-bold">{cadet.testsCompleted}</td>
+                      <td className="py-3 text-right font-mono text-slate-200">{cadet.averageScore}%</td>
+                      <td className="py-3 text-right font-mono font-bold text-defence-400">{cadet.bestScore}%</td>
+                    </tr>
+                  ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
   );
 };

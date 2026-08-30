@@ -16,11 +16,38 @@ export const PerformancePage: React.FC = () => {
   );
 
   const scores = cadetSubmissions.map((s) => s.percentage);
-  const highestScore = scores.length > 0 ? Math.max(...scores) : cadetUser.bestScore;
-  const lowestScore = scores.length > 0 ? Math.min(...scores) : Math.max(0, cadetUser.averageScore - 15);
+  const highestScore = scores.length > 0 ? Math.max(...scores) : (cadetUser.bestScore || 0);
+  const lowestScore = scores.length > 0 ? Math.min(...scores) : 0;
   const overallAccuracy = cadetSubmissions.length > 0
     ? Math.round((cadetSubmissions.reduce((a, b) => a + b.accuracy, 0) / cadetSubmissions.length) * 10) / 10
-    : 92.4;
+    : 0;
+
+  // Overall totals for donut chart
+  let totalCorrect = 0;
+  let totalWrong = 0;
+  let totalUnanswered = 0;
+
+  cadetSubmissions.forEach((s) => {
+    totalCorrect += s.correctCount;
+    totalWrong += s.wrongCount;
+    totalUnanswered += s.unansweredCount;
+  });
+
+  // Subject performance dynamically computed from submissions
+  const subjectMap = new Map<string, { total: number; correct: number }>();
+  cadetSubmissions.forEach((s) => {
+    const subj = s.subject || s.exam || 'General';
+    const curr = subjectMap.get(subj) || { total: 0, correct: 0 };
+    curr.total += (s.correctCount + s.wrongCount + s.unansweredCount);
+    curr.correct += s.correctCount;
+    subjectMap.set(subj, curr);
+  });
+
+  const subjectPerformanceData = Array.from(subjectMap.entries()).map(([subject, data]) => ({
+    subject,
+    accuracy: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
+    total: data.total,
+  }));
 
   const chartData = cadetSubmissions.map((s, idx) => ({
     testName: `Test ${idx + 1}`,
@@ -45,7 +72,7 @@ export const PerformancePage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Average Score</p>
-          <p className="text-2xl font-black text-gold-400 mt-1">{cadetUser.averageScore}%</p>
+          <p className="text-2xl font-black text-gold-400 mt-1">{cadetUser.averageScore || 0}%</p>
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Highest Score</p>
@@ -61,11 +88,11 @@ export const PerformancePage: React.FC = () => {
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Completion Rate</p>
-          <p className="text-2xl font-black text-defence-400 mt-1">98.5%</p>
+          <p className="text-2xl font-black text-defence-400 mt-1">{cadetSubmissions.length > 0 ? '100%' : '0%'}</p>
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Current Rank</p>
-          <p className="text-2xl font-black text-white mt-1">#{cadetUser.rank}</p>
+          <p className="text-2xl font-black text-white mt-1">#{cadetUser.rank || 1}</p>
         </div>
       </div>
 
@@ -78,7 +105,7 @@ export const PerformancePage: React.FC = () => {
 
         <div className="rounded-3xl bg-navy-900/90 border border-slate-800 p-6 space-y-4 shadow-xl flex flex-col justify-between">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Correct vs Wrong Ratio</h3>
-          <CorrectWrongDonutChart correct={28} wrong={4} unanswered={2} />
+          <CorrectWrongDonutChart correct={totalCorrect} wrong={totalWrong} unanswered={totalUnanswered} />
         </div>
       </div>
 
@@ -86,7 +113,7 @@ export const PerformancePage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-3xl bg-navy-900/90 border border-slate-800 p-6 space-y-4 shadow-xl">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Subject-Wise Strength Analysis</h3>
-          <SubjectPerformanceChart />
+          <SubjectPerformanceChart data={subjectPerformanceData} />
         </div>
 
         <div className="rounded-3xl bg-navy-900/90 border border-slate-800 p-6 space-y-5 shadow-xl">
@@ -96,29 +123,30 @@ export const PerformancePage: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1.5">
                 <span className="text-slate-300">CDS (UPSC Standard)</span>
-                <span className="text-defence-400 font-bold">88.5% Ready</span>
+                <span className="text-defence-400 font-bold">{overallAccuracy > 0 ? `${overallAccuracy}% Ready` : 'Not Started'}</span>
               </div>
               <div className="w-full h-2.5 bg-navy-950 rounded-full overflow-hidden border border-slate-800">
-                <div className="h-full bg-defence-500 rounded-full" style={{ width: '88.5%' }} />
+                <div className="h-full bg-defence-500 rounded-full" style={{ width: `${overallAccuracy}%` }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1.5">
                 <span className="text-slate-300">AFCAT (IAF CBT Standard)</span>
-                <span className="text-gold-400 font-bold">92.0% Ready</span>
+                <span className="text-gold-400 font-bold">{overallAccuracy > 0 ? `${overallAccuracy}% Ready` : 'Not Started'}</span>
               </div>
               <div className="w-full h-2.5 bg-navy-950 rounded-full overflow-hidden border border-slate-800">
-                <div className="h-full bg-gold-500 rounded-full" style={{ width: '92%' }} />
+                <div className="h-full bg-gold-500 rounded-full" style={{ width: `${overallAccuracy}%` }} />
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-navy-950 border border-slate-800/80 text-xs text-slate-300 leading-relaxed mt-4">
-              💡 <strong>Officer Recommendation:</strong> Your spatial and numerical aptitude in AFCAT tests is in the top 5th percentile nationwide. Practice additional English PQRS and Indian Polity revision tests to boost your CDS sectional aggregate.
+              💡 <strong>Officer Recommendation:</strong> {cadetSubmissions.length > 0 ? 'Regular mock exam practice will improve sectional timing and accuracy.' : 'Complete your first full-length mock test to generate custom strength analysis and recommendations.'}
             </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

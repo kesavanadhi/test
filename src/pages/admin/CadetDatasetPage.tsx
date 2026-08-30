@@ -359,7 +359,7 @@ export const CadetDatasetPage: React.FC = () => {
                     <th className="py-3 px-4">Email</th>
                     <th className="py-3 px-4">College / Dept</th>
                     <th className="py-3 px-3">Reg No</th>
-                    <th className="py-3 px-3">Package</th>
+                    <th className="py-3 px-3">Target Exam</th>
                     <th className="py-3 px-3">Validation</th>
                     <th className="py-3 px-3 text-right">Action</th>
                   </tr>
@@ -377,10 +377,11 @@ export const CadetDatasetPage: React.FC = () => {
                       </td>
                       <td className="py-3 px-3 font-mono text-slate-400">{r.data.registerNumber}</td>
                       <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-gold-400 border border-amber-500/30">
-                          {r.data.packageName || r.data.package}
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
+                          {r.data.targetExam || 'Both'}
                         </span>
                       </td>
+
                       <td className="py-3 px-3">
                         {r.isValid ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-defence-950 text-defence-300 border border-defence-500/30">

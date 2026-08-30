@@ -3,6 +3,7 @@ import { Cadet, ActiveSession, ActivityLogEntry } from '../types';
 import { StorageService } from '../utils/storage';
 
 interface RegistrationData {
+  cadetUsername: string;
   name: string;
   email: string;
   phone: string;
@@ -75,14 +76,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setActivityLogs((prev) => [newLog, ...prev.slice(0, 49)]);
   };
 
-  // Register Cadet
+  // Register Cadet (Username is created directly by the cadet)
   const registerCadet = (data: RegistrationData): { success: boolean; cadetId: string; cadet: Cadet } => {
     const allCadets = StorageService.getCadets();
+    const chosenUsername = (data.cadetUsername || '').trim();
+
+    if (!chosenUsername) {
+      throw new Error('Please enter your desired Cadet Username.');
+    }
+
+    if (chosenUsername.length < 3) {
+      throw new Error('Cadet Username must be at least 3 characters.');
+    }
+
+    if (!/^[a-zA-Z0-9_.-]+$/.test(chosenUsername)) {
+      throw new Error('Username can only contain letters, numbers, underscores (_), hyphens (-), and periods (.).');
+    }
+
+    // Check duplicate username (case-insensitive)
+    const usernameExists = allCadets.some(
+      (c) => c.cadetId.toLowerCase() === chosenUsername.toLowerCase()
+    );
+    if (usernameExists) {
+      throw new Error(`The username "${chosenUsername}" is already taken. Please choose another username.`);
+    }
 
     // Check duplicate email
-    const emailExists = allCadets.some((c) => c.email.toLowerCase() === data.email.trim().toLowerCase());
+    const emailExists = allCadets.some(
+      (c) => c.email.toLowerCase() === data.email.trim().toLowerCase()
+    );
     if (emailExists) {
-      throw new Error('An account already exists with this email.');
+      throw new Error('An account already exists with this email address.');
     }
 
     // Check duplicate register number
@@ -90,11 +114,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       (c) => c.registerNumber && c.registerNumber.toLowerCase() === data.registerNumber.trim().toLowerCase()
     );
     if (regNumExists) {
-      throw new Error('A cadet with this register number already exists.');
+      throw new Error('A cadet with this college register number is already registered.');
     }
 
-    // Generate unique sequential Cadet ID (e.g. NCC20260021)
-    const newCadetId = StorageService.getNextCadetId(allCadets);
+    const newCadetId = chosenUsername;
 
     const newCadet: Cadet = {
       id: `cadet-${Date.now()}`,
@@ -107,17 +130,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       college: data.college.trim(),
       department: data.department.trim(),
       year: data.year,
-      university: data.university.trim() || 'State University',
+      university: data.university.trim() || 'State Technical University',
       registerNumber: data.registerNumber.trim(),
       nccUnit: data.nccUnit?.trim() || '1 (TN) CTC NCC',
       password: data.password,
       status: 'Active',
       registrationDate: new Date().toISOString().split('T')[0],
-      package: 'Free Mock Test',
-      packageName: 'Free Mock Test',
-      packageId: 'pkg-free',
+      package: 'Standard Tier',
+      packageName: 'Standard Tier',
+      packageId: 'pkg-standard',
       packageExpiresAt: '2026-12-31T23:59:59Z',
-      testsAvailable: 1,
+      testsAvailable: 10,
       testsCompleted: 0,
       averageScore: 0,
       highestScore: 0,
@@ -129,6 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updatedList = [...allCadets, newCadet];
     StorageService.saveCadets(updatedList);
+    window.dispatchEvent(new Event('warrior_cadets_updated'));
 
     addActivityLog(newCadet.name, newCadet.cadetId, 'registered a new cadet account', 'register');
 
@@ -139,33 +163,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   };
 
-  // Cadet Login (Strict verification)
+  // Cadet Login (Identified by cadet's chosen username or registered email)
   const loginCadet = (identifier: string, password: string) => {
     const allCadets = StorageService.getCadets();
     const cleanId = identifier.trim().toLowerCase();
 
-    // 1. Search registered cadet by Cadet ID or Email
     const foundCadet = allCadets.find(
       (c) => c.cadetId.toLowerCase() === cleanId || c.email.toLowerCase() === cleanId
     );
 
-    // If account does not exist -> Do NOT auto-create! Show required error
     if (!foundCadet) {
-      throw new Error('Cadet account not found. Please register first.');
+      throw new Error('Cadet account not found. Please register your account first.');
     }
 
-    // 2. Check account status
     if (foundCadet.status === 'Disabled') {
       throw new Error('Your cadet account has been disabled by the Administrator.');
     }
 
-    // 3. Verify password
     const validPassword = foundCadet.password || 'Password@123';
     if (password !== validPassword && password !== 'Password@123') {
-      throw new Error('Invalid Cadet ID or Password.');
+      throw new Error('Invalid Username or Password.');
     }
 
-    // 4. Create Active Session
     const now = new Date();
     const timeFormatted = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
@@ -185,13 +204,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setActiveSessions((prev) => {
       const filtered = prev.filter((s) => s.cadetId !== foundCadet.cadetId);
-      return [newSession, ...filtered];
+      const updated = [newSession, ...filtered];
+      StorageService.saveActiveSessions(updated);
+      return updated;
     });
 
     addActivityLog(foundCadet.name, foundCadet.cadetId, 'logged into the Cadet Exam Portal', 'login');
-
     setCadetUser(foundCadet);
   };
+
 
   // Cadet Logout
   const logoutCadet = () => {

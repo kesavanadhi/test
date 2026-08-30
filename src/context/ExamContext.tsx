@@ -33,7 +33,7 @@ interface ExamContextType {
 const ExamContext = createContext<ExamContextType | undefined>(undefined);
 
 export const ExamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { cadetUser } = useAuth();
+  const { cadetUser, updateCurrentCadetSession } = useAuth();
   const { recordSubmission } = useData();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -75,8 +75,17 @@ export const ExamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsSubmitting(false);
     setLatestResult(null);
 
+    // Live telemetry update for Admin Live Activity
+    updateCurrentCadetSession({
+      status: 'Writing Test',
+      currentTest: test.name,
+      currentExam: test.exam,
+      currentPage: 'Live Exam',
+      timeRemaining: `${test.durationMinutes}:00`,
+    });
+
     navigate('/cadet/live-exam');
-  }, [navigate]);
+  }, [navigate, updateCurrentCadetSession]);
 
   // Submit Exam handler
   const submitExam = useCallback(
@@ -125,6 +134,14 @@ export const ExamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsExamActive(false);
       setIsSubmitting(false);
 
+      // Live telemetry update
+      updateCurrentCadetSession({
+        status: 'Online',
+        currentPage: 'Scorecard & Results',
+        currentTest: undefined,
+        timeRemaining: undefined,
+      });
+
       if (isAutoSubmit) {
         setIsTimeUp(true);
         showToast('warning', "Time's Up!", 'Your test was automatically submitted as time expired.');
@@ -137,10 +154,11 @@ export const ExamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
       }
 
-      navigate('/cadet/result');
+      navigate('/cadet/results');
     },
-    [activeTest, examQuestions, isSubmitting, timeRemainingSeconds, answers, questionStates, cadetUser, recordSubmission, showToast, navigate]
+    [activeTest, examQuestions, isSubmitting, timeRemainingSeconds, answers, questionStates, cadetUser, recordSubmission, updateCurrentCadetSession, showToast, navigate]
   );
+
 
   // Timer countdown effect
   useEffect(() => {

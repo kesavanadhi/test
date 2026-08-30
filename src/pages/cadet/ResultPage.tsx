@@ -20,34 +20,42 @@ import {
 } from 'lucide-react';
 import { useExam } from '../../context/ExamContext';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatTimeSeconds } from '../../utils/formatters';
 import { CorrectWrongDonutChart } from '../../components/analytics';
+
 
 export const ResultPage: React.FC = () => {
   const { latestResult } = useExam();
   const { submissions } = useData();
+  const { cadetUser } = useAuth();
   const navigate = useNavigate();
   const [showCertificate, setShowCertificate] = useState(false);
 
-  // If latestResult from memory isn't present, take the most recent submission from data
-  const resultData = latestResult || (submissions.length > 0 ? {
-    submission: submissions[0],
+  const cadetSubmissions = submissions.filter(
+    (s) => s.cadetId === cadetUser?.cadetId || s.cadetName === cadetUser?.name
+  );
+
+  // If latestResult from memory isn't present, take the most recent submission of this cadet
+  const resultData = latestResult || (cadetSubmissions.length > 0 ? {
+    submission: cadetSubmissions[0],
     breakdown: {
-      correctCount: submissions[0].correctCount,
-      wrongCount: submissions[0].wrongCount,
-      unansweredCount: submissions[0].unansweredCount,
-      markedForReviewCount: submissions[0].markedForReviewCount,
-      totalQuestions: Object.keys(submissions[0].answers).length,
-      score: submissions[0].score,
-      maxScore: submissions[0].maxScore,
-      percentage: submissions[0].percentage,
-      accuracy: submissions[0].accuracy,
-      passed: submissions[0].passed,
-      marksGained: submissions[0].correctCount * 1,
-      marksLost: submissions[0].wrongCount * 0.33,
+      correctCount: cadetSubmissions[0].correctCount,
+      wrongCount: cadetSubmissions[0].wrongCount,
+      unansweredCount: cadetSubmissions[0].unansweredCount,
+      markedForReviewCount: cadetSubmissions[0].markedForReviewCount,
+      totalQuestions: Object.keys(cadetSubmissions[0].answers).length,
+      score: cadetSubmissions[0].score,
+      maxScore: cadetSubmissions[0].maxScore,
+      percentage: cadetSubmissions[0].percentage,
+      accuracy: cadetSubmissions[0].accuracy,
+      passed: cadetSubmissions[0].passed,
+      marksGained: cadetSubmissions[0].correctCount * 1,
+      marksLost: cadetSubmissions[0].wrongCount * 0.33,
       subjectWise: {},
     }
   } : null);
+
 
   if (!resultData) {
     return (

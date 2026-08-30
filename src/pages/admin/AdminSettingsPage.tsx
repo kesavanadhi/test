@@ -156,28 +156,6 @@ export const AdminSettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Admin Credentials Info */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-navy-900/90 border border-slate-800 space-y-4 shadow-xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2 pb-3 border-b border-slate-800">
-            <Key className="w-4 h-4 text-gold-400" />
-            <span>Officer Authentication & Access Keys</span>
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="p-4 rounded-2xl bg-navy-950 border border-slate-800">
-              <span className="text-slate-500 block">Master Admin ID</span>
-              <span className="font-mono font-bold text-white text-sm mt-0.5 block">NCC</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-navy-950 border border-slate-800">
-              <span className="text-slate-500 block">Demo Admin Password</span>
-              <span className="font-mono font-bold text-defence-400 text-sm mt-0.5 block">Ncc@2023</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-navy-950 border border-slate-800">
-              <span className="text-slate-500 block">Cloud Hosting Mode</span>
-              <span className="font-mono font-bold text-gold-400 text-sm mt-0.5 block">Dual Vercel & Netlify</span>
-            </div>
-          </div>
-        </div>
 
         {/* Save Button */}
         <div className="flex justify-end">

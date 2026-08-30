@@ -37,11 +37,11 @@ export const AdminDashboard: React.FC = () => {
 
   const avgScore = submissions.length > 0
     ? Math.round((submissions.reduce((a, b) => a + b.percentage, 0) / submissions.length) * 10) / 10
-    : 78.4;
+    : 0;
 
   const passRate = submissions.length > 0
     ? Math.round((submissions.filter((s) => s.passed).length / submissions.length) * 100)
-    : 85;
+    : 0;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -52,12 +52,13 @@ export const AdminDashboard: React.FC = () => {
             <span className="px-3 py-1 rounded-md text-[10px] font-extrabold uppercase bg-amber-950 text-gold-400 border border-amber-500/30">
               Officer Master Portal
             </span>
-            <span className="text-xs text-slate-400">Authenticated ID: NCC</span>
+            <span className="text-xs text-slate-400">Command & Control</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white font-display mt-1">
             Admin Command Dashboard
           </h1>
         </div>
+
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
@@ -157,39 +158,48 @@ export const AdminDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {simulatedLiveSessions.slice(0, 6).map((act: ActiveSession) => (
-                <tr key={act.sessionId} className="hover:bg-navy-850/60 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-slate-300">{act.cadetId}</td>
-                  <td className="py-3 px-4 font-semibold text-white">{act.cadetName}</td>
-                  <td className="py-3 px-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
-                      {act.currentExam || 'AFCAT'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-slate-300 max-w-xs truncate">{act.currentTest || act.currentPage}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      act.status === 'Writing Test'
-                        ? 'bg-amber-950 text-amber-300 border border-amber-500/40 animate-pulse'
-                        : act.status === 'Online'
-                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                        : act.status === 'Completed'
-                        ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800'
-                    }`}>
-                      {act.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-slate-400">{act.loginTime}</td>
-                  <td className="py-3 px-4 font-mono text-slate-300">
-                    {act.timeRemaining || '—'}
-                  </td>
-                  <td className="py-3 px-4 text-right font-bold text-white">
-                    {act.score ? `${act.score} pts` : '—'}
+              {simulatedLiveSessions.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-slate-500 text-xs">
+                    No active cadet sessions currently online.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                simulatedLiveSessions.slice(0, 6).map((act: ActiveSession) => (
+                  <tr key={act.sessionId} className="hover:bg-navy-850/60 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-slate-300">{act.cadetId}</td>
+                    <td className="py-3 px-4 font-semibold text-white">{act.cadetName}</td>
+                    <td className="py-3 px-3">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
+                        {act.currentExam || 'AFCAT'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-300 max-w-xs truncate">{act.currentTest || act.currentPage}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        act.status === 'Writing Test'
+                          ? 'bg-amber-950 text-amber-300 border border-amber-500/40 animate-pulse'
+                          : act.status === 'Online'
+                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
+                          : act.status === 'Completed'
+                          ? 'bg-defence-950 text-defence-300 border border-defence-500/30'
+                          : 'bg-slate-900 text-slate-400 border border-slate-800'
+                      }`}>
+                        {act.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-400">{act.loginTime}</td>
+                    <td className="py-3 px-4 font-mono text-slate-300">
+                      {act.timeRemaining || '—'}
+                    </td>
+                    <td className="py-3 px-4 text-right font-bold text-white">
+                      {act.score ? `${act.score} pts` : '—'}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
+
           </table>
         </div>
 

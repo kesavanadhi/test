@@ -60,7 +60,7 @@ export const AccessControlPage: React.FC = () => {
             <thead className="bg-navy-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
               <tr>
                 <th className="py-4 px-6">Cadet Aspirant</th>
-                <th className="py-4 px-4">Package</th>
+                <th className="py-4 px-4">Target Exam</th>
                 {tests.map((t) => (
                   <th key={t.id} className="py-4 px-3 text-center truncate max-w-[120px]" title={t.name}>
                     {t.name.substring(0, 14)}...
@@ -69,37 +69,44 @@ export const AccessControlPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filteredCadets.map((cadet) => (
-                <tr key={cadet.id} className="hover:bg-navy-850/60 transition-colors">
-                  <td className="py-3.5 px-6">
-                    <p className="font-bold text-white">{cadet.name}</p>
-                    <p className="text-[10px] font-mono text-slate-400">{cadet.cadetId}</p>
+              {filteredCadets.length === 0 ? (
+                <tr>
+                  <td colSpan={2 + tests.length} className="py-12 text-center text-slate-500 text-xs">
+                    No registered cadets found.
                   </td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-gold-400 border border-amber-500/30">
-                      {cadet.packageName}
-                    </span>
-                  </td>
-                  {tests.map((t) => {
-                    const hasAccess = (cadet.accessibleTestIds || []).includes(t.id);
-                    return (
-                      <td key={t.id} className="py-3.5 px-3 text-center">
-                        <button
-                          onClick={() => toggleAccess(cadet.id, t.id)}
-                          className={`p-1.5 rounded-lg transition-all ${
-                            hasAccess
-                              ? 'bg-defence-900 text-defence-400 border border-defence-500/40'
-                              : 'bg-navy-950 text-slate-600 border border-slate-800 hover:text-slate-400'
-                          }`}
-                          title={hasAccess ? 'Access Granted' : 'Access Locked'}
-                        >
-                          {hasAccess ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                        </button>
-                      </td>
-                    );
-                  })}
                 </tr>
-              ))}
+              ) : (
+                filteredCadets.map((cadet) => (
+                  <tr key={cadet.id} className="hover:bg-navy-850/60 transition-colors">
+                    <td className="py-3.5 px-6">
+                      <p className="font-bold text-white">{cadet.name}</p>
+                      <p className="text-[10px] font-mono text-slate-400">{cadet.cadetId}</p>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-navy-950 text-defence-400 border border-defence-600/30">
+                        {cadet.targetExam || 'CDS'}
+                      </span>
+                    </td>
+                    {tests.map((t) => {
+                      const hasAccess = (cadet.accessibleTestIds || []).includes(t.id);
+                      return (
+                        <td key={t.id} className="py-3.5 px-3 text-center">
+                          <button
+                            onClick={() => toggleAccess(cadet.id, t.id)}
+                            className={`p-1.5 rounded-lg border transition-all ${
+                              hasAccess
+                                ? 'bg-defence-950 text-defence-400 border-defence-500/40 hover:bg-red-950 hover:text-red-400'
+                                : 'bg-navy-950 text-slate-600 border-slate-800 hover:border-slate-600'
+                            }`}
+                          >
+                            {hasAccess ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

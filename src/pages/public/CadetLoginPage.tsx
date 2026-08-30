@@ -24,7 +24,7 @@ export const CadetLoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { loginCadet, quickDemoLoginCadet } = useAuth();
+  const { loginCadet } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -50,15 +50,6 @@ export const CadetLoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = (cadetId: string, name: string) => {
-    try {
-      quickDemoLoginCadet(cadetId);
-      showToast('success', `Demo Login: ${name}`, `Authenticated as ${cadetId}`);
-      navigate('/cadet/dashboard');
-    } catch (err: any) {
-      setErrorMessage(err.message);
-    }
-  };
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center animate-fade-in">
@@ -97,12 +88,12 @@ export const CadetLoginPage: React.FC = () => {
         <form onSubmit={handleLogin} className="p-6 sm:p-8 rounded-3xl bg-navy-900/90 border border-slate-800 space-y-6 shadow-2xl">
           <div className="space-y-4 text-xs">
             <div className="space-y-1.5">
-              <label className="font-semibold text-slate-300">Cadet ID / Registered Email</label>
+              <label className="font-semibold text-slate-300">Cadet Username / Registered Email</label>
               <div className="relative">
                 <input
                   type="text"
                   required
-                  placeholder="e.g. NCC20260001 or arun.kumar@gmail.com"
+                  placeholder="e.g. your_username or email@domain.com"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-navy-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-defence-500 font-semibold"
@@ -110,16 +101,18 @@ export const CadetLoginPage: React.FC = () => {
               </div>
             </div>
 
+
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="font-semibold text-slate-300">Password</label>
                 <button
                   type="button"
-                  onClick={() => showToast('info', 'Password Reset', 'Please contact your NCC Officer Admin or check demo credentials.')}
+                  onClick={() => showToast('info', 'Password Reset', 'Please contact your NCC Officer Administrator to reset your password.')}
                   className="text-[11px] text-defence-400 hover:underline"
                 >
                   Forgot Password?
                 </button>
+
               </div>
               <div className="relative">
                 <input
@@ -172,36 +165,12 @@ export const CadetLoginPage: React.FC = () => {
           </div>
         </form>
 
-        {/* 1-Click Demo Cadet Logins for Testing */}
-        <div className="p-5 rounded-2xl bg-navy-900/60 border border-slate-800 space-y-3 shadow-xl">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300">
-            <Sparkles className="w-4 h-4 text-gold-400" />
-            <span>1-Click Demo Cadet Accounts</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              onClick={() => handleDemoLogin('NCC20260001', 'Arun Kumar')}
-              className="p-2.5 rounded-xl bg-navy-950 hover:bg-navy-850 border border-slate-800 text-left transition-all"
-            >
-              <span className="font-bold text-white block">Arun Kumar</span>
-              <span className="text-[10px] text-defence-400 font-mono">NCC20260001 (Rank #1)</span>
-            </button>
-
-            <button
-              onClick={() => handleDemoLogin('NCC20260002', 'Rahul Kumar')}
-              className="p-2.5 rounded-xl bg-navy-950 hover:bg-navy-850 border border-slate-800 text-left transition-all"
-            >
-              <span className="font-bold text-white block">Rahul Kumar</span>
-              <span className="text-[10px] text-gold-400 font-mono">NCC20260002 (AFCAT)</span>
-            </button>
-          </div>
-        </div>
-
         <div className="text-center">
           <Link to="/admin/login" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
             Officer Administrative Portal Login →
           </Link>
         </div>
+
       </div>
     </div>
   );

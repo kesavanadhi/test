@@ -202,11 +202,12 @@ export function exportCadetsToCSV(cadets: Cadet[]) {
       'University': c.university,
       'Register Number': c.registerNumber,
       'NCC Unit': c.nccUnit,
-      'Package': c.packageName,
+      'Target Exam': c.targetExam || 'Both',
       'Status': c.status,
       'Registration Date': c.registrationDate,
     }))
   );
+
   const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
   downloadBlob(csvOutput, 'cadet_master_dataset.csv', 'text/csv;charset=utf-8;');
 }
@@ -224,7 +225,7 @@ export function exportCadetsToExcel(cadets: Cadet[]) {
       'University': c.university,
       'Register Number': c.registerNumber,
       'NCC Unit': c.nccUnit,
-      'Package': c.packageName,
+      'Target Exam': c.targetExam || 'Both',
       'Status': c.status,
       'Registration Date': c.registrationDate,
     }))
@@ -252,7 +253,7 @@ export function downloadSampleCSV() {
       'University': 'Anna University',
       'Register Number': '311521106045',
       'NCC Unit': '1 (TN) CTC NCC',
-      'Package': 'Complete Defence Pack',
+      'Target Exam': 'CDS',
       'Status': 'Active',
       'Registration Date': '2024-02-01',
     },
@@ -267,7 +268,7 @@ export function downloadSampleCSV() {
       'University': 'Anna University',
       'Register Number': '311520101088',
       'NCC Unit': '1 (TN) Air Sqn NCC',
-      'Package': 'AFCAT Practice Pack',
+      'Target Exam': 'AFCAT',
       'Status': 'Active',
       'Registration Date': '2024-02-01',
     },
@@ -290,7 +291,7 @@ export function downloadSampleExcel() {
       'University': 'Anna University',
       'Register Number': '311521106045',
       'NCC Unit': '1 (TN) CTC NCC',
-      'Package': 'Complete Defence Pack',
+      'Target Exam': 'CDS',
       'Status': 'Active',
       'Registration Date': '2024-02-01',
     },
@@ -305,7 +306,7 @@ export function downloadSampleExcel() {
       'University': 'Anna University',
       'Register Number': '311520101088',
       'NCC Unit': '1 (TN) Air Sqn NCC',
-      'Package': 'AFCAT Practice Pack',
+      'Target Exam': 'AFCAT',
       'Status': 'Active',
       'Registration Date': '2024-02-01',
     },
@@ -315,6 +316,7 @@ export function downloadSampleExcel() {
   XLSX.utils.book_append_sheet(wb, ws, 'SampleCadets');
   XLSX.writeFile(wb, 'sample_cadet_dataset_template.xlsx');
 }
+
 
 function downloadBlob(content: string, fileName: string, contentType: string) {
   const blob = new Blob([content], { type: contentType });

@@ -109,42 +109,51 @@ export const AdminResultsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filteredSubmissions.map((sub) => (
-                <tr key={sub.id} className="hover:bg-navy-850/60 transition-colors">
-                  <td className="py-4 px-6">
-                    <p className="font-bold text-white">{sub.cadetName}</p>
-                    <p className="text-[10px] font-mono text-slate-400">{sub.cadetId}</p>
-                  </td>
-                  <td className="py-4 px-3">
-                    <span className="px-2.5 py-1 rounded text-[10px] font-extrabold bg-navy-950 text-defence-400 border border-defence-600/30">
-                      {sub.exam}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 font-semibold text-slate-200 max-w-xs truncate">{sub.testName}</td>
-                  <td className="py-4 px-4 font-black text-white">{sub.score} / {sub.maxScore}</td>
-                  <td className="py-4 px-4 font-bold text-defence-400">{sub.percentage}%</td>
-                  <td className="py-4 px-4 text-slate-300">
-                    <span className="text-defence-400">{sub.correctCount}C</span> / <span className="text-red-400">{sub.wrongCount}W</span>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-slate-400">{formatTimeSeconds(sub.timeTakenSeconds)}</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      sub.passed ? 'bg-defence-950 text-defence-300 border border-defence-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'
-                    }`}>
-                      {sub.passed ? 'Passed' : 'Failed'}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    <button
-                      onClick={() => setInspectSubmission(sub)}
-                      className="px-3 py-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-200 font-semibold text-[11px]"
-                    >
-                      Inspect Sheet
-                    </button>
+              {filteredSubmissions.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-12 text-center text-slate-500 text-xs">
+                    No mock test evaluation results recorded yet. Completed cadet tests will appear here.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredSubmissions.map((sub) => (
+                  <tr key={sub.id} className="hover:bg-navy-850/60 transition-colors">
+                    <td className="py-4 px-6">
+                      <p className="font-bold text-white">{sub.cadetName}</p>
+                      <p className="text-[10px] font-mono text-slate-400">{sub.cadetId}</p>
+                    </td>
+                    <td className="py-4 px-3">
+                      <span className="px-2.5 py-1 rounded text-[10px] font-extrabold bg-navy-950 text-defence-400 border border-defence-600/30">
+                        {sub.exam}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 font-semibold text-slate-200 max-w-xs truncate">{sub.testName}</td>
+                    <td className="py-4 px-4 font-black text-white">{sub.score} / {sub.maxScore}</td>
+                    <td className="py-4 px-4 font-bold text-defence-400">{sub.percentage}%</td>
+                    <td className="py-4 px-4 text-slate-300">
+                      <span className="text-defence-400">{sub.correctCount}C</span> / <span className="text-red-400">{sub.wrongCount}W</span>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-slate-400">{formatTimeSeconds(sub.timeTakenSeconds)}</td>
+                    <td className="py-4 px-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        sub.passed ? 'bg-defence-950 text-defence-300 border border-defence-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'
+                      }`}>
+                        {sub.passed ? 'Passed' : 'Failed'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <button
+                        onClick={() => setInspectSubmission(sub)}
+                        className="px-3 py-1 rounded bg-navy-800 hover:bg-navy-700 text-slate-200 font-semibold text-[11px]"
+                      >
+                        Inspect Sheet
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
+
           </table>
         </div>
       </div>

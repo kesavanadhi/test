@@ -21,7 +21,7 @@ export const AdminLoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { loginAdmin, quickDemoLoginAdmin } = useAuth();
+  const { loginAdmin } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -38,15 +38,6 @@ export const AdminLoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = () => {
-    try {
-      quickDemoLoginAdmin();
-      showToast('success', 'Master Admin Demo Login', 'Authenticated as NCC Officer Admin.');
-      navigate('/admin/dashboard');
-    } catch (err: any) {
-      setErrorMessage(err.message);
-    }
-  };
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center animate-fade-in">
@@ -123,28 +114,12 @@ export const AdminLoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* 1-Click Demo Login Box */}
-        <div className="p-5 rounded-2xl bg-navy-900/60 border border-slate-800 space-y-3 shadow-xl text-center">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300">
-            <KeyRound className="w-4 h-4 text-gold-400" />
-            <span>Evaluation Credentials</span>
-          </div>
-          <p className="text-xs text-slate-400">
-            ID: <code className="text-gold-400 font-bold bg-navy-950 px-1.5 py-0.5 rounded">NCC</code> • Password: <code className="text-gold-400 font-bold bg-navy-950 px-1.5 py-0.5 rounded">Ncc@2023</code>
-          </p>
-          <button
-            onClick={handleDemoLogin}
-            className="w-full py-2.5 rounded-xl bg-navy-950 hover:bg-navy-850 border border-amber-500/40 text-gold-400 text-xs font-bold uppercase tracking-wider transition-all"
-          >
-            1-Click Demo Admin Login
-          </button>
-        </div>
-
         <div className="text-center">
           <Link to="/cadet/login" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
             ← Switch to Cadet Portal Login
           </Link>
         </div>
+
       </div>
     </div>
   );

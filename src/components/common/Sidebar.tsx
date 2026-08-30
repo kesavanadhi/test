@@ -3,13 +3,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileCheck2,
-  Package,
   History,
   Award,
   BarChart3,
   Trophy,
   User,
   LogOut,
+
   Users,
   HelpCircle,
   PlusCircle,
@@ -63,7 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const cadetNavItems: NavItem[] = [
     { name: 'Dashboard', path: '/cadet/dashboard', icon: LayoutDashboard },
     { name: 'Mock Tests', path: '/cadet/mock-tests', icon: FileCheck2 },
-    { name: 'My Packages', path: '/cadet/packages', icon: Package },
     { name: 'Test History', path: '/cadet/history', icon: History },
     { name: 'Results & Review', path: '/cadet/results', icon: Award },
     { name: 'Performance', path: '/cadet/performance', icon: BarChart3 },
@@ -79,7 +78,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { name: 'Mock Tests', path: '/admin/tests', icon: FileCheck2 },
     { name: 'Question Bank', path: '/admin/question-bank', icon: HelpCircle },
     { name: 'Add Questions', path: '/admin/add-questions', icon: PlusCircle, highlight: true },
-    { name: 'Test Packages', path: '/admin/packages', icon: Package },
     { name: 'Access Control', path: '/admin/access-control', icon: FolderLock },
     { name: 'All Results', path: '/admin/results', icon: Award },
     { name: 'Platform Analytics', path: '/admin/analytics', icon: BarChart3 },
@@ -180,11 +178,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {role === 'cadet' ? cadetUser?.name : 'Officer Administrator'}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate">
-                  {role === 'cadet' ? cadetUser?.cadetId : 'ID: NCC'}
+                  {role === 'cadet' ? cadetUser?.cadetId : 'Master Officer'}
                 </p>
               </div>
             </div>
           )}
+
 
           <button
             onClick={handleLogout}

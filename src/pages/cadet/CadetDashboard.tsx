@@ -30,7 +30,16 @@ export const CadetDashboard: React.FC = () => {
   );
 
   const availableTests = tests.filter((t) => t.status === 'Live');
-  const testsRemaining = Math.max(0, availableTests.length - cadetUser.testsCompleted);
+  const testsCompletedCount = cadetSubmissions.length;
+  const testsRemaining = Math.max(0, availableTests.length - testsCompletedCount);
+
+  const avgScore = testsCompletedCount > 0
+    ? Math.round((cadetSubmissions.reduce((a, b) => a + b.percentage, 0) / testsCompletedCount) * 10) / 10
+    : 0;
+
+  const highestScore = testsCompletedCount > 0
+    ? Math.max(...cadetSubmissions.map((s) => s.percentage))
+    : 0;
 
   // Overall totals for donut chart
   let totalCorrect = 0;
@@ -43,12 +52,29 @@ export const CadetDashboard: React.FC = () => {
     totalUnanswered += s.unansweredCount;
   });
 
+  // Subject performance dynamically computed from cadet submissions
+  const subjectMap = new Map<string, { total: number; correct: number }>();
+  cadetSubmissions.forEach((s) => {
+    const subj = s.subject || s.exam || 'General';
+    const curr = subjectMap.get(subj) || { total: 0, correct: 0 };
+    curr.total += (s.correctCount + s.wrongCount + s.unansweredCount);
+    curr.correct += s.correctCount;
+    subjectMap.set(subj, curr);
+  });
+
+  const subjectPerformanceData = Array.from(subjectMap.entries()).map(([subject, data]) => ({
+    subject,
+    accuracy: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0,
+    total: data.total,
+  }));
+
   const chartData = cadetSubmissions.map((s, idx) => ({
     testName: `Test ${idx + 1}`,
     score: s.score,
     percentage: s.percentage,
     date: formatDate(s.submittedAt),
   })).reverse();
+
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -57,11 +83,12 @@ export const CadetDashboard: React.FC = () => {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-navy-950/80 border border-defence-500/40 text-[11px] font-bold text-defence-400 uppercase tracking-wider">
-              <span>{cadetUser.packageName} Active</span>
+              <span>Cadet ID: {cadetUser.cadetId}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white font-display">
               Welcome back, Cadet {cadetUser.name}!
             </h1>
+
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
               You are on track for your target examination (<strong className="text-gold-400">{cadetUser.targetExam}</strong>). Keep up regular timed mock test practice.
             </p>
@@ -94,15 +121,15 @@ export const CadetDashboard: React.FC = () => {
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Tests Completed</p>
-          <p className="text-2xl sm:text-3xl font-black text-defence-400 mt-1.5">{cadetUser.testsCompleted}</p>
+          <p className="text-2xl sm:text-3xl font-black text-defence-400 mt-1.5">{testsCompletedCount}</p>
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Average Score</p>
-          <p className="text-2xl sm:text-3xl font-black text-gold-400 mt-1.5">{cadetUser.averageScore}%</p>
+          <p className="text-2xl sm:text-3xl font-black text-gold-400 mt-1.5">{avgScore}%</p>
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Best Score</p>
-          <p className="text-2xl sm:text-3xl font-black text-defence-400 mt-1.5">{cadetUser.bestScore}%</p>
+          <p className="text-2xl sm:text-3xl font-black text-defence-400 mt-1.5">{highestScore}%</p>
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Tests Remaining</p>
@@ -110,7 +137,7 @@ export const CadetDashboard: React.FC = () => {
         </div>
         <div className="p-4 rounded-2xl bg-navy-900/80 border border-slate-800 shadow-xl">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Current Rank</p>
-          <p className="text-2xl sm:text-3xl font-black text-white mt-1.5">#{cadetUser.rank}</p>
+          <p className="text-2xl sm:text-3xl font-black text-white mt-1.5">#{cadetUser.rank || 1}</p>
         </div>
       </div>
 
@@ -123,8 +150,9 @@ export const CadetDashboard: React.FC = () => {
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">Score Progression</h3>
               <p className="text-xs text-slate-400">Your test performance percentage trajectory</p>
             </div>
-            <span className="text-xs text-defence-400 font-semibold">Latest: {cadetUser.averageScore}%</span>
+            <span className="text-xs text-defence-400 font-semibold">Latest: {avgScore}%</span>
           </div>
+
           <ScoreProgressionChart data={chartData} />
         </div>
 
@@ -135,9 +163,9 @@ export const CadetDashboard: React.FC = () => {
             <p className="text-xs text-slate-400">Total attempted questions distribution</p>
           </div>
           <CorrectWrongDonutChart
-            correct={totalCorrect || 24}
-            wrong={totalWrong || 5}
-            unanswered={totalUnanswered || 2}
+            correct={totalCorrect}
+            wrong={totalWrong}
+            unanswered={totalUnanswered}
           />
         </div>
       </div>
@@ -153,8 +181,9 @@ export const CadetDashboard: React.FC = () => {
             Detailed Analytics
           </Link>
         </div>
-        <SubjectPerformanceChart />
+        <SubjectPerformanceChart data={subjectPerformanceData} />
       </div>
+
 
       {/* Recently Completed Tests */}
       <div className="rounded-2xl bg-navy-900/80 border border-slate-800 p-5 sm:p-6 space-y-4 shadow-xl">
