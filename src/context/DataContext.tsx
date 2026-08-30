@@ -45,6 +45,9 @@ interface DataContextType {
   createTest: (test: MockTest) => void;
   updateTest: (test: MockTest) => void;
   deleteTest: (id: string) => void;
+  addPackage: (pkg: Package) => void;
+  updatePackage: (pkg: Package) => void;
+  deletePackage: (id: string) => void;
   recordSubmission: (submission: TestSubmission) => void;
   markNotificationRead: (id: string) => void;
   resetAllData: () => void;
@@ -60,6 +63,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [submissions, setSubmissions] = useState<TestSubmission[]>(() => StorageService.getSubmissions());
   const [notifications, setNotifications] = useState<PlatformNotification[]>(() => StorageService.getNotifications());
   const [leaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
+
+  // Sync to LocalStorage on updates
+  useEffect(() => {
+    StorageService.saveCadets(cadets);
+  }, [cadets]);
+
+  useEffect(() => {
+    StorageService.saveQuestions(questions);
+  }, [questions]);
+
+  useEffect(() => {
+    StorageService.saveTests(tests);
+  }, [tests]);
+
+  useEffect(() => {
+    StorageService.savePackages(packages);
+  }, [packages]);
+
+  useEffect(() => {
+    StorageService.saveSubmissions(submissions);
+  }, [submissions]);
+
   // Dynamically map live sessions strictly from registered cadets only (No fake / ideal person)
   const simulatedLiveSessions: ActiveSession[] = cadets.map((cadet, idx) => {
     const isWriting = idx % 2 === 0;
@@ -187,6 +212,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTests((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Package CRUD
+  const addPackage = (pkg: Package) => {
+    setPackages((prev) => [pkg, ...prev]);
+  };
+
+  const updatePackage = (pkg: Package) => {
+    setPackages((prev) => prev.map((p) => (p.id === pkg.id ? pkg : p)));
+  };
+
+  const deletePackage = (id: string) => {
+    setPackages((prev) => prev.filter((p) => p.id !== id));
+  };
+
   // Submissions
   const recordSubmission = (submission: TestSubmission) => {
     setSubmissions((prev) => [submission, ...prev]);
@@ -245,6 +283,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         createTest,
         updateTest,
         deleteTest,
+        addPackage,
+        updatePackage,
+        deletePackage,
         recordSubmission,
         markNotificationRead,
         resetAllData,

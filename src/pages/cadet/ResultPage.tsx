@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Award,
@@ -14,6 +14,9 @@ import {
   X,
   FileCheck2,
   Sparkles,
+  Download,
+  Printer,
+  Shield,
 } from 'lucide-react';
 import { useExam } from '../../context/ExamContext';
 import { useData } from '../../context/DataContext';
@@ -24,6 +27,7 @@ export const ResultPage: React.FC = () => {
   const { latestResult } = useExam();
   const { submissions } = useData();
   const navigate = useNavigate();
+  const [showCertificate, setShowCertificate] = useState(false);
 
   // If latestResult from memory isn't present, take the most recent submission from data
   const resultData = latestResult || (submissions.length > 0 ? {
@@ -59,6 +63,10 @@ export const ResultPage: React.FC = () => {
   }
 
   const { submission, breakdown } = resultData;
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in py-4">
@@ -112,7 +120,7 @@ export const ResultPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Score Calculation Breakdown (Requirement #51) */}
+      {/* Score Calculation Breakdown */}
       <div className="p-5 sm:p-6 rounded-2xl bg-navy-900/90 border border-slate-800 space-y-3 shadow-xl">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
           <Award className="w-4 h-4 text-gold-400" />
@@ -216,6 +224,14 @@ export const ResultPage: React.FC = () => {
           <ArrowRight className="w-4 h-4" />
         </Link>
 
+        <button
+          onClick={() => setShowCertificate(true)}
+          className="px-6 py-3.5 rounded-xl bg-navy-900 hover:bg-navy-850 text-gold-400 font-bold text-xs border border-gold-500/40 transition-all flex items-center gap-2 shadow-lg"
+        >
+          <Award className="w-4 h-4" />
+          <span>Download Merit Certificate</span>
+        </button>
+
         <Link
           to="/cadet/mock-tests"
           className="px-6 py-3.5 rounded-xl bg-navy-900 hover:bg-navy-850 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-2"
@@ -231,6 +247,79 @@ export const ResultPage: React.FC = () => {
           Cadet Dashboard
         </Link>
       </div>
+
+      {/* Certificate Modal */}
+      {showCertificate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/90 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-2xl bg-white text-navy-950 rounded-3xl p-8 sm:p-12 shadow-2xl border-8 border-defence-800 relative space-y-6">
+            <button
+              onClick={() => setShowCertificate(false)}
+              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-navy-950 transition-colors print:hidden"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Official Certificate Design */}
+            <div className="text-center space-y-3 border-b-2 border-defence-700/30 pb-6">
+              <div className="w-16 h-16 mx-auto mb-2">
+                <img src="/assets/warrior-logo.webp" alt="WARRIOR Logo" className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black font-display tracking-widest text-defence-900 uppercase">
+                WARRIOR DEFENCE ACADEMY
+              </h2>
+              <p className="text-xs tracking-widest uppercase font-bold text-slate-600">
+                Official Examination Merit Certificate
+              </p>
+            </div>
+
+            <div className="text-center space-y-4 py-2">
+              <p className="text-xs text-slate-600 uppercase tracking-wider">This is to certify that</p>
+              <h3 className="text-2xl sm:text-3xl font-black text-navy-900 font-display underline decoration-gold-500 decoration-2">
+                {submission.cadetName}
+              </h3>
+              <p className="text-xs text-slate-600">
+                Cadet ID: <strong className="font-mono text-navy-900">{submission.cadetId}</strong>
+              </p>
+
+              <p className="text-sm text-slate-700 max-w-lg mx-auto leading-relaxed">
+                has successfully completed the <strong>{submission.testName}</strong> ({submission.exam} Standard) scoring{' '}
+                <strong className="text-defence-800 font-black">{submission.score} / {submission.maxScore} marks</strong> ({submission.percentage}%) with an accuracy rate of{' '}
+                <strong className="text-defence-800 font-black">{submission.accuracy}%</strong>.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between pt-6 border-t border-slate-300 text-xs text-slate-600">
+              <div>
+                <p className="font-semibold">Date of Examination</p>
+                <p className="font-bold text-navy-900">{new Date(submission.submittedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full border-2 border-gold-600 flex items-center justify-center mx-auto text-gold-600 font-serif font-black text-xs">
+                  SEAL
+                </div>
+                <p className="text-[10px] uppercase font-bold mt-1 text-gold-700">Verified Cadet</p>
+              </div>
+
+              <div className="text-right">
+                <p className="font-semibold">Commanding Officer</p>
+                <p className="font-bold text-navy-900 font-serif">WARRIOR Board of Examiners</p>
+              </div>
+            </div>
+
+            {/* Print CTA */}
+            <div className="flex justify-end gap-3 pt-4 print:hidden">
+              <button
+                onClick={handlePrint}
+                className="px-6 py-2.5 rounded-xl bg-defence-800 hover:bg-defence-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print Certificate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
