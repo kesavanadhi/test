@@ -43,6 +43,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(() => StorageService.getActiveSessions());
   const [activityLogs, setActivityLogs] = useState<ActivityLogEntry[]>(() => StorageService.getActivityLogs());
 
+  // Keep logged in cadet synchronized with latest changes from admin
+  useEffect(() => {
+    const handleCadetsUpdate = () => {
+      if (cadetUser) {
+        const freshCadets = StorageService.getCadets();
+        const freshCadet = freshCadets.find(
+          (c) => c.cadetId.toLowerCase() === cadetUser.cadetId.toLowerCase() || c.id === cadetUser.id
+        );
+        if (freshCadet) {
+          setCadetUser(freshCadet);
+          StorageService.saveCadetAuth(freshCadet);
+        }
+      }
+    };
+    window.addEventListener('warrior_cadets_updated', handleCadetsUpdate);
+    window.addEventListener('storage', handleCadetsUpdate);
+    return () => {
+      window.removeEventListener('warrior_cadets_updated', handleCadetsUpdate);
+      window.removeEventListener('storage', handleCadetsUpdate);
+    };
+  }, [cadetUser]);
+
   // Save auth state
   useEffect(() => {
     StorageService.saveCadetAuth(cadetUser);
@@ -211,8 +233,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     addActivityLog(foundCadet.name, foundCadet.cadetId, 'logged into the Cadet Exam Portal', 'login');
     setCadetUser(foundCadet);
+    StorageService.saveCadetAuth(foundCadet);
   };
-
 
   // Cadet Logout
   const logoutCadet = () => {

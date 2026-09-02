@@ -13,13 +13,14 @@ import {
   AlertCircle,
   Play,
   RotateCcw,
+  ShieldAlert,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { MockTest, ExamCategory } from '../../types';
 
 export const MockTestList: React.FC = () => {
-  const { tests, submissions } = useData();
+  const { tests, submissions, cadets } = useData();
   const { cadetUser } = useAuth();
   const navigate = useNavigate();
 
@@ -27,21 +28,43 @@ export const MockTestList: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Always resolve latest cadet data from central state
+  const currentCadet = cadets.find(
+    (c) => c.cadetId.toLowerCase() === cadetUser?.cadetId.toLowerCase() || c.id === cadetUser?.id
+  ) || cadetUser;
+
   const completedTestIds = new Set(
     submissions
-      .filter((s) => s.cadetId === cadetUser?.cadetId || s.cadetName === cadetUser?.name)
+      .filter((s) => s.cadetId === currentCadet?.cadetId || s.cadetName === currentCadet?.name)
       .map((s) => s.testId)
   );
 
+  const checkIsTestLocked = (test: MockTest): boolean => {
+    // 1. Locked by admin status (Draft or Disabled)
+    if (test.status === 'Draft' || test.status === 'Disabled') {
+      return true;
+    }
+    // 2. Locked by Admin Access Control for this specific cadet
+    if (currentCadet?.accessibleTestIds && currentCadet.accessibleTestIds.length > 0) {
+      if (!currentCadet.accessibleTestIds.includes(test.id)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const filteredTests = tests.filter((test) => {
     if (selectedExam !== 'All' && test.exam !== selectedExam) return false;
-    
-    // Status filter
+
     const isCompleted = completedTestIds.has(test.id);
+    const isLocked = checkIsTestLocked(test);
+    const isUpcoming = test.status === 'Scheduled';
+
+    // Status filter
     if (selectedStatus === 'Completed' && !isCompleted) return false;
-    if (selectedStatus === 'Available' && (isCompleted || test.status !== 'Live')) return false;
-    if (selectedStatus === 'Locked' && (test.status !== 'Draft' && test.status !== 'Disabled')) return false;
-    if (selectedStatus === 'Upcoming' && test.status !== 'Scheduled') return false;
+    if (selectedStatus === 'Available' && (isCompleted || isLocked || isUpcoming)) return false;
+    if (selectedStatus === 'Locked' && !isLocked) return false;
+    if (selectedStatus === 'Upcoming' && !isUpcoming) return false;
 
     // Search query
     if (searchQuery.trim()) {
@@ -129,19 +152,23 @@ export const MockTestList: React.FC = () => {
         <div className="text-center py-16 bg-navy-900/60 rounded-3xl border border-slate-800 space-y-3">
           <FileCheck2 className="w-12 h-12 text-slate-600 mx-auto" />
           <h3 className="text-base font-bold text-white">No Mock Tests Found</h3>
-          <p className="text-xs text-slate-400">Try adjusting your exam category or search query.</p>
+          <p className="text-xs text-slate-400">Try adjusting your exam category or filter criteria.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTests.map((test) => {
             const isCompleted = completedTestIds.has(test.id);
-            const isLocked = test.status === 'Draft' || test.status === 'Disabled';
+            const isLocked = checkIsTestLocked(test);
             const isUpcoming = test.status === 'Scheduled';
 
             return (
               <div
                 key={test.id}
-                className="rounded-3xl bg-navy-900/90 border border-slate-800 p-6 sm:p-7 flex flex-col justify-between hover:border-defence-500/40 hover:shadow-2xl transition-all group"
+                className={`rounded-3xl border p-6 sm:p-7 flex flex-col justify-between transition-all group ${
+                  isLocked
+                    ? 'bg-navy-950/70 border-slate-850 opacity-80'
+                    : 'bg-navy-900/90 border-slate-800 hover:border-defence-500/40 hover:shadow-2xl'
+                }`}
               >
                 <div className="space-y-4">
                   {/* Top Bar: Exam badge & Status */}
@@ -159,8 +186,8 @@ export const MockTestList: React.FC = () => {
                         Upcoming
                       </span>
                     ) : isLocked ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] font-bold border border-slate-700 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Locked
+                      <span className="px-2.5 py-0.5 rounded-full bg-red-950/80 text-red-400 text-[10px] font-bold border border-red-500/40 flex items-center gap-1">
+                        <Lock className="w-3 h-3" /> Locked by Admin
                       </span>
                     ) : (
                       <span className="px-2.5 py-0.5 rounded-full bg-defence-950 text-defence-400 text-[10px] font-bold border border-defence-500/30">
@@ -171,7 +198,7 @@ export const MockTestList: React.FC = () => {
 
                   {/* Title & Subject */}
                   <div>
-                    <h3 className="font-bold text-lg text-white group-hover:text-defence-300 transition-colors tracking-wide leading-snug">
+                    <h3 className={`font-bold text-lg transition-colors tracking-wide leading-snug ${isLocked ? 'text-slate-300' : 'text-white group-hover:text-defence-300'}`}>
                       {test.name}
                     </h3>
                     <p className="text-xs text-slate-400 mt-1">Subject: {test.subject}</p>
@@ -221,12 +248,15 @@ export const MockTestList: React.FC = () => {
                       </Link>
                     </div>
                   ) : isLocked ? (
-                    <button
-                      disabled
-                      className="w-full py-3 rounded-xl bg-navy-950 text-slate-500 font-bold text-xs uppercase tracking-wider cursor-not-allowed border border-slate-800 flex items-center justify-center gap-2"
-                    >
-                      <Lock className="w-3.5 h-3.5" /> Locked
-                    </button>
+                    <div className="p-2.5 rounded-xl bg-navy-950 border border-red-500/30 text-center space-y-1">
+                      <div className="text-[11px] font-bold text-red-300 flex items-center justify-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-red-400" />
+                        <span>Paper Locked by Admin</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500">
+                        Access is restricted for your account. Contact Officer Admin to unlock.
+                      </p>
+                    </div>
                   ) : (
                     <Link
                       to={`/cadet/instructions/${test.id}`}

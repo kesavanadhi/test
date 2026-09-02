@@ -67,7 +67,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [notifications, setNotifications] = useState<PlatformNotification[]>(() => StorageService.getNotifications());
   const [leaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
 
-  // Keep cadets state reactive to registration and dataset updates
+  // Keep cadets state reactive to registration and dataset updates without clobbering
   useEffect(() => {
     const handleCadetsUpdate = () => {
       setCadets(StorageService.getCadets());
@@ -79,27 +79,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       window.removeEventListener('warrior_cadets_updated', handleCadetsUpdate);
     };
   }, []);
-
-  // Sync to LocalStorage on updates
-  useEffect(() => {
-    StorageService.saveCadets(cadets);
-  }, [cadets]);
-
-  useEffect(() => {
-    StorageService.saveQuestions(questions);
-  }, [questions]);
-
-  useEffect(() => {
-    StorageService.saveTests(tests);
-  }, [tests]);
-
-  useEffect(() => {
-    StorageService.savePackages(packages);
-  }, [packages]);
-
-  useEffect(() => {
-    StorageService.saveSubmissions(submissions);
-  }, [submissions]);
 
   // Real active sessions from auth context
   const realActiveSessions = activeSessions.filter((s) => s.status !== 'Logged Out');
@@ -114,34 +93,57 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     recentlyLoggedOut: activeSessions.filter((s) => s.status === 'Logged Out').length,
   };
 
-
-
-  // Cadet CRUD
+  // Cadet CRUD with immediate persistence
   const addCadet = (cadet: Cadet) => {
-    setCadets((prev) => [cadet, ...prev]);
+    setCadets((prev) => {
+      const updated = [cadet, ...prev];
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const updateCadet = (cadet: Cadet) => {
-    setCadets((prev) => prev.map((c) => (c.id === cadet.id ? cadet : c)));
+    setCadets((prev) => {
+      const updated = prev.map((c) => (c.id === cadet.id || c.cadetId === cadet.cadetId ? cadet : c));
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const deleteCadet = (id: string) => {
-    setCadets((prev) => prev.filter((c) => c.id !== id && c.cadetId !== id));
+    setCadets((prev) => {
+      const updated = prev.filter((c) => c.id !== id && c.cadetId !== id);
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const updateCadetStatus = (id: string, status: Cadet['status']) => {
-    setCadets((prev) => prev.map((c) => (c.id === id || c.cadetId === id ? { ...c, status } : c)));
+    setCadets((prev) => {
+      const updated = prev.map((c) => (c.id === id || c.cadetId === id ? { ...c, status } : c));
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const updateCadetAccess = (cadetId: string, testIds: string[]) => {
-    setCadets((prev) =>
-      prev.map((c) => (c.id === cadetId || c.cadetId === cadetId ? { ...c, accessibleTestIds: testIds } : c))
-    );
+    setCadets((prev) => {
+      const updated = prev.map((c) =>
+        c.id === cadetId || c.cadetId === cadetId ? { ...c, accessibleTestIds: testIds } : c
+      );
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const updateCadetPackage = (cadetId: string, packageId: string, packageName: string) => {
-    setCadets((prev) =>
-      prev.map((c) =>
+    setCadets((prev) => {
+      const updated = prev.map((c) =>
         c.id === cadetId || c.cadetId === cadetId
           ? {
               ...c,
@@ -150,14 +152,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               package: packageName,
             }
           : c
-      )
-    );
+      );
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   // Bulk Dataset Import & Export
   const importCadetDataset = (rows: DatasetValidationRow[], mode: ImportMode) => {
     const { updatedCadets, countAdded, countUpdated } = mergeImportedCadets(cadets, rows, mode);
     setCadets(updatedCadets);
+    StorageService.saveCadets(updatedCadets);
+    window.dispatchEvent(new Event('warrior_cadets_updated'));
     return { countAdded, countUpdated };
   };
 
@@ -169,48 +176,89 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Question CRUD
   const addQuestion = (q: Question) => {
-    setQuestions((prev) => [q, ...prev]);
+    setQuestions((prev) => {
+      const updated = [q, ...prev];
+      StorageService.saveQuestions(updated);
+      return updated;
+    });
   };
 
   const addBulkQuestions = (qs: Question[]) => {
-    setQuestions((prev) => [...qs, ...prev]);
+    setQuestions((prev) => {
+      const updated = [...qs, ...prev];
+      StorageService.saveQuestions(updated);
+      return updated;
+    });
   };
 
   const deleteQuestion = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
+    setQuestions((prev) => {
+      const updated = prev.filter((q) => q.id !== id);
+      StorageService.saveQuestions(updated);
+      return updated;
+    });
   };
 
   // Test CRUD
   const createTest = (test: MockTest) => {
-    setTests((prev) => [test, ...prev]);
+    setTests((prev) => {
+      const updated = [test, ...prev];
+      StorageService.saveTests(updated);
+      return updated;
+    });
   };
 
   const updateTest = (test: MockTest) => {
-    setTests((prev) => prev.map((t) => (t.id === test.id ? test : t)));
+    setTests((prev) => {
+      const updated = prev.map((t) => (t.id === test.id ? test : t));
+      StorageService.saveTests(updated);
+      return updated;
+    });
   };
 
   const deleteTest = (id: string) => {
-    setTests((prev) => prev.filter((t) => t.id !== id));
+    setTests((prev) => {
+      const updated = prev.filter((t) => t.id !== id);
+      StorageService.saveTests(updated);
+      return updated;
+    });
   };
 
   // Package CRUD
   const addPackage = (pkg: Package) => {
-    setPackages((prev) => [pkg, ...prev]);
+    setPackages((prev) => {
+      const updated = [pkg, ...prev];
+      StorageService.savePackages(updated);
+      return updated;
+    });
   };
 
   const updatePackage = (pkg: Package) => {
-    setPackages((prev) => prev.map((p) => (p.id === pkg.id ? pkg : p)));
+    setPackages((prev) => {
+      const updated = prev.map((p) => (p.id === pkg.id ? pkg : p));
+      StorageService.savePackages(updated);
+      return updated;
+    });
   };
 
   const deletePackage = (id: string) => {
-    setPackages((prev) => prev.filter((p) => p.id !== id));
+    setPackages((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      StorageService.savePackages(updated);
+      return updated;
+    });
   };
 
   // Submissions
   const recordSubmission = (submission: TestSubmission) => {
-    setSubmissions((prev) => [submission, ...prev]);
-    setCadets((prev) =>
-      prev.map((c) =>
+    setSubmissions((prev) => {
+      const updatedSub = [submission, ...prev];
+      StorageService.saveSubmissions(updatedSub);
+      return updatedSub;
+    });
+
+    setCadets((prev) => {
+      const updated = prev.map((c) =>
         c.cadetId === submission.cadetId
           ? {
               ...c,
@@ -220,12 +268,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               highestScore: Math.max(c.highestScore || 0, submission.percentage),
             }
           : c
-      )
-    );
+      );
+      StorageService.saveCadets(updated);
+      window.dispatchEvent(new Event('warrior_cadets_updated'));
+      return updated;
+    });
   };
 
   const markNotificationRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
+      StorageService.saveNotifications(updated);
+      return updated;
+    });
   };
 
   const resetAllData = () => {
@@ -236,6 +291,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setPackages(StorageService.getPackages());
     setSubmissions(StorageService.getSubmissions());
     setNotifications(StorageService.getNotifications());
+    window.dispatchEvent(new Event('warrior_cadets_updated'));
   };
 
   return (

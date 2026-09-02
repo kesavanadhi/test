@@ -15,18 +15,18 @@ export const AccessControlPage: React.FC = () => {
   );
 
   const toggleAccess = (cadetId: string, testId: string) => {
-    const cadet = cadets.find((c) => c.id === cadetId);
+    const cadet = cadets.find((c) => c.id === cadetId || c.cadetId === cadetId);
     if (!cadet) return;
 
     const current = cadet.accessibleTestIds || [];
     const exists = current.includes(testId);
     const updated = exists ? current.filter((id) => id !== testId) : [...current, testId];
 
-    updateCadetAccess(cadetId, updated);
+    updateCadetAccess(cadet.id, updated);
     showToast(
-      'success',
-      'Permissions Updated',
-      `${cadet.name} ${exists ? 'revoked from' : 'granted access to'} test.`
+      exists ? 'warning' : 'success',
+      exists ? 'Access Locked' : 'Access Unlocked',
+      `Test ${exists ? 'locked' : 'unlocked'} for ${cadet.name} (${cadet.cadetId}).`
     );
   };
 
@@ -96,8 +96,9 @@ export const AccessControlPage: React.FC = () => {
                             className={`p-1.5 rounded-lg border transition-all ${
                               hasAccess
                                 ? 'bg-defence-950 text-defence-400 border-defence-500/40 hover:bg-red-950 hover:text-red-400'
-                                : 'bg-navy-950 text-slate-600 border-slate-800 hover:border-slate-600'
+                                : 'bg-red-950/60 text-red-400 border-red-500/40 hover:bg-defence-950 hover:text-defence-400'
                             }`}
+                            title={hasAccess ? 'Access Granted (Click to Lock)' : 'Access Locked (Click to Unlock)'}
                           >
                             {hasAccess ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                           </button>

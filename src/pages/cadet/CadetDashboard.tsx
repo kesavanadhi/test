@@ -20,16 +20,26 @@ import { formatDate } from '../../utils/formatters';
 
 export const CadetDashboard: React.FC = () => {
   const { cadetUser } = useAuth();
-  const { tests, submissions } = useData();
+  const { tests, submissions, cadets } = useData();
   const navigate = useNavigate();
 
   if (!cadetUser) return null;
 
+  const currentCadet = cadets.find(
+    (c) => c.cadetId.toLowerCase() === cadetUser.cadetId.toLowerCase() || c.id === cadetUser.id
+  ) || cadetUser;
+
   const cadetSubmissions = submissions.filter(
-    (s) => s.cadetId === cadetUser.cadetId || s.cadetName === cadetUser.name
+    (s) => s.cadetId === currentCadet.cadetId || s.cadetName === currentCadet.name
   );
 
-  const availableTests = tests.filter((t) => t.status === 'Live');
+  const availableTests = tests.filter((t) => {
+    if (t.status !== 'Live') return false;
+    if (currentCadet?.accessibleTestIds && currentCadet.accessibleTestIds.length > 0) {
+      return currentCadet.accessibleTestIds.includes(t.id);
+    }
+    return true;
+  });
   const testsCompletedCount = cadetSubmissions.length;
   const testsRemaining = Math.max(0, availableTests.length - testsCompletedCount);
 

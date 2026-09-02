@@ -9,14 +9,18 @@ import {
   ArrowRight,
   Shield,
   Zap,
+  Lock,
+  ShieldAlert,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useExam } from '../../context/ExamContext';
 import { useToast } from '../../context/ToastContext';
 
 export const TestInstructions: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();
-  const { tests, questions } = useData();
+  const { tests, questions, cadets } = useData();
+  const { cadetUser } = useAuth();
   const { startExam } = useExam();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -25,12 +29,28 @@ export const TestInstructions: React.FC = () => {
 
   const test = tests.find((t) => t.id === testId) || tests[0];
 
+  // Resolve current cadet and lock state
+  const currentCadet = cadets.find(
+    (c) => c.cadetId.toLowerCase() === cadetUser?.cadetId.toLowerCase() || c.id === cadetUser?.id
+  ) || cadetUser;
+
+  const isTestDisabled = test.status === 'Draft' || test.status === 'Disabled';
+  const isCadetDenied = currentCadet?.accessibleTestIds && currentCadet.accessibleTestIds.length > 0
+    ? !currentCadet.accessibleTestIds.includes(test.id)
+    : false;
+  const isLocked = isTestDisabled || isCadetDenied;
+
   // Resolve questions for this test
   const testQuestions = test.questionIds
     .map((qId) => questions.find((q) => q.id === qId))
     .filter(Boolean) as typeof questions;
 
   const handleStart = () => {
+    if (isLocked) {
+      showToast('error', 'Access Restricted', 'This mock examination is currently locked by the Administrator.');
+      return;
+    }
+
     if (!agreed) {
       showToast('warning', 'Agreement Required', 'Please confirm that you have read all exam instructions before starting.');
       return;
@@ -65,6 +85,19 @@ export const TestInstructions: React.FC = () => {
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
           {test.description}
         </p>
+
+        {/* Locked Warning Banner if Test is Locked */}
+        {isLocked && (
+          <div className="p-4 rounded-2xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-3 animate-shake shadow-lg">
+            <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
+            <div>
+              <p className="font-bold text-red-300">Examination Paper Locked by Administrator</p>
+              <p className="text-[11px] text-red-300/80 mt-0.5">
+                Access to this test has been locked in the Admin Portal for your cadet account ({currentCadet?.cadetId}). You cannot start this exam until unlocked by an officer.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Key Examination Parameters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800">
@@ -143,31 +176,24 @@ export const TestInstructions: React.FC = () => {
               <strong>Marking Scheme:</strong> Correct Answer = <strong>+{test.exam === 'AFCAT' ? 3 : 1} Mark(s)</strong>. Wrong Answer = <strong>-{test.negativeMarking} Mark(s)</strong>. Unanswered questions receive <strong>0 marks</strong>.
             </p>
           </div>
-
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-navy-950/70 border border-slate-800/80">
-            <span className="w-5 h-5 rounded-full bg-defence-800 text-defence-300 font-bold flex items-center justify-center shrink-0 mt-0.5">
-              6
-            </span>
-            <p>
-              <strong>One-Time Submission:</strong> Submitted tests cannot be restarted unless permitted by the administrator.
-            </p>
-          </div>
         </div>
 
         {/* Agreement Checkbox */}
-        <div className="pt-4 border-t border-slate-800">
-          <label className="flex items-start gap-3 cursor-pointer p-4 rounded-2xl bg-navy-950 border border-defence-500/30 hover:border-defence-500/60 transition-all">
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 rounded bg-navy-900 border-slate-700 text-defence-600 focus:ring-defence-500 w-5 h-5"
-            />
-            <span className="text-xs text-slate-200 font-medium leading-relaxed select-none">
-              I have read and understood all the instructions above. I declare that I will adhere to the rules of this mock examination and will not use unauthorized materials.
-            </span>
-          </label>
-        </div>
+        {!isLocked && (
+          <div className="pt-4 border-t border-slate-800">
+            <label className="flex items-start gap-3 cursor-pointer p-4 rounded-2xl bg-navy-950 border border-defence-500/30 hover:border-defence-500/60 transition-all">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 rounded bg-navy-900 border-slate-700 text-defence-600 focus:ring-defence-500 w-5 h-5"
+              />
+              <span className="text-xs text-slate-200 font-medium leading-relaxed select-none">
+                I have read and understood all the instructions above. I declare that I will adhere to the rules of this mock examination and will not use unauthorized materials.
+              </span>
+            </label>
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
@@ -178,19 +204,29 @@ export const TestInstructions: React.FC = () => {
             Cancel & Back
           </Link>
 
-          <button
-            onClick={handleStart}
-            disabled={!agreed}
-            className={`w-full sm:w-auto py-3.5 px-8 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl transition-all ${
-              agreed
-                ? 'bg-gradient-to-r from-defence-600 to-defence-500 hover:from-defence-500 hover:to-defence-400 text-white shadow-defence-950/60 hover:scale-105 border border-defence-400/50 cursor-pointer'
-                : 'bg-navy-950 text-slate-500 border border-slate-800 cursor-not-allowed'
-            }`}
-          >
-            <Zap className="w-4 h-4 text-gold-400" />
-            <span>Start Test Now</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {isLocked ? (
+            <button
+              disabled
+              className="w-full sm:w-auto py-3.5 px-8 rounded-xl bg-navy-950 text-red-400 border border-red-500/30 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Test Locked by Admin</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleStart}
+              disabled={!agreed}
+              className={`w-full sm:w-auto py-3.5 px-8 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-2xl transition-all ${
+                agreed
+                  ? 'bg-gradient-to-r from-defence-600 to-defence-500 hover:from-defence-500 hover:to-defence-400 text-white shadow-defence-950/60 hover:scale-105 border border-defence-400/50 cursor-pointer'
+                  : 'bg-navy-950 text-slate-500 border border-slate-800 cursor-not-allowed'
+              }`}
+            >
+              <Zap className="w-4 h-4 text-gold-400" />
+              <span>Start Test Now</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>
