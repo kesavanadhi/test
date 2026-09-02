@@ -11,6 +11,8 @@ import {
   Eye,
   X,
   Shuffle,
+  Link2,
+  Share2,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useToast } from '../../context/ToastContext';
@@ -306,6 +308,17 @@ export const TestManagementPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6 text-right space-x-2">
+                    <button
+                      onClick={() => {
+                        const url = `${window.location.origin}/cadet/instructions/${t.id}`;
+                        navigator.clipboard.writeText(url);
+                        showToast('success', 'Test Link Copied', `Direct link for ${t.name} copied to clipboard!`);
+                      }}
+                      className="p-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-gold-400 hover:text-gold-300 transition-all inline-block border border-slate-700"
+                      title="Copy Direct Test Link"
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={() => {
                         const newStatus = t.status === 'Live' ? 'Disabled' : 'Live';

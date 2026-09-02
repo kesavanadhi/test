@@ -70,6 +70,14 @@ export const LandingPage: React.FC = () => {
               <BookOpen className="w-4 h-4 text-gold-400" />
               <span>Explore Mock Tests</span>
             </Link>
+
+            <Link
+              to="/cadet/packages"
+              className="px-7 py-4 rounded-2xl bg-navy-950/80 hover:bg-navy-900 text-slate-300 hover:text-defence-300 font-bold text-xs uppercase tracking-wider border border-slate-800 transition-all flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-defence-400" />
+              <span>Test Packages</span>
+            </Link>
           </div>
 
           <div className="pt-2 text-xs text-slate-400 flex items-center justify-center gap-4">

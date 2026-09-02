@@ -9,7 +9,7 @@ import {
   Trophy,
   User,
   LogOut,
-
+  Package,
   Users,
   HelpCircle,
   PlusCircle,
@@ -63,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const cadetNavItems: NavItem[] = [
     { name: 'Dashboard', path: '/cadet/dashboard', icon: LayoutDashboard },
     { name: 'Mock Tests', path: '/cadet/mock-tests', icon: FileCheck2 },
+    { name: 'Test Packages', path: '/cadet/packages', icon: Package },
     { name: 'Test History', path: '/cadet/history', icon: History },
     { name: 'Results & Review', path: '/cadet/results', icon: Award },
     { name: 'Performance', path: '/cadet/performance', icon: BarChart3 },
@@ -78,6 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { name: 'Mock Tests', path: '/admin/tests', icon: FileCheck2 },
     { name: 'Question Bank', path: '/admin/question-bank', icon: HelpCircle },
     { name: 'Add Questions', path: '/admin/add-questions', icon: PlusCircle, highlight: true },
+    { name: 'Packages', path: '/admin/packages', icon: Package },
     { name: 'Access Control', path: '/admin/access-control', icon: FolderLock },
     { name: 'All Results', path: '/admin/results', icon: Award },
     { name: 'Platform Analytics', path: '/admin/analytics', icon: BarChart3 },

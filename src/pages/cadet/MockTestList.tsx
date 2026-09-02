@@ -14,14 +14,19 @@ import {
   Play,
   RotateCcw,
   ShieldAlert,
+  Link2,
+  Share2,
+  Package,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { MockTest, ExamCategory } from '../../types';
 
 export const MockTestList: React.FC = () => {
   const { tests, submissions, cadets } = useData();
   const { cadetUser } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [selectedExam, setSelectedExam] = useState<'All' | ExamCategory>('All');
@@ -233,38 +238,71 @@ export const MockTestList: React.FC = () => {
                 {/* Actions */}
                 <div className="pt-6 mt-4 border-t border-slate-800/80 space-y-2">
                   {isCompleted ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link
-                        to="/cadet/results"
-                        className="py-2.5 px-3 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-200 font-bold text-xs uppercase tracking-wider text-center transition-all"
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link
+                          to="/cadet/results"
+                          className="py-2.5 px-3 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-200 font-bold text-xs uppercase tracking-wider text-center transition-all"
+                        >
+                          View Result
+                        </Link>
+                        <Link
+                          to="/cadet/review"
+                          className="py-2.5 px-3 rounded-xl bg-defence-800 hover:bg-defence-700 text-defence-100 font-bold text-xs uppercase tracking-wider text-center transition-all"
+                        >
+                          Review
+                        </Link>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/cadet/instructions/${test.id}`;
+                          navigator.clipboard.writeText(url);
+                          showToast('success', 'Test Link Copied', `Direct link for ${test.name} copied to clipboard!`);
+                        }}
+                        className="w-full py-2 rounded-xl bg-navy-950 hover:bg-navy-850 text-slate-400 hover:text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 border border-slate-800 transition-all"
                       >
-                        View Result
-                      </Link>
-                      <Link
-                        to="/cadet/review"
-                        className="py-2.5 px-3 rounded-xl bg-defence-800 hover:bg-defence-700 text-defence-100 font-bold text-xs uppercase tracking-wider text-center transition-all"
-                      >
-                        Review
-                      </Link>
+                        <Link2 className="w-3.5 h-3.5" />
+                        <span>Copy Shareable Test Link</span>
+                      </button>
                     </div>
                   ) : isLocked ? (
-                    <div className="p-2.5 rounded-xl bg-navy-950 border border-red-500/30 text-center space-y-1">
+                    <div className="p-3 rounded-xl bg-navy-950 border border-red-500/30 text-center space-y-2">
                       <div className="text-[11px] font-bold text-red-300 flex items-center justify-center gap-1.5">
                         <Lock className="w-3.5 h-3.5 text-red-400" />
-                        <span>Paper Locked by Admin</span>
+                        <span>Paper Locked</span>
                       </div>
                       <p className="text-[10px] text-slate-500">
-                        Access is restricted for your account. Contact Officer Admin to unlock.
+                        Access is restricted for your current package tier or account.
                       </p>
+                      <Link
+                        to="/cadet/packages"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-defence-400 hover:underline pt-1"
+                      >
+                        <Package className="w-3.5 h-3.5" />
+                        <span>Explore / Upgrade Packages</span>
+                      </Link>
                     </div>
                   ) : (
-                    <Link
-                      to={`/cadet/instructions/${test.id}`}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-defence-600 to-defence-500 hover:from-defence-500 hover:to-defence-400 text-white font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-lg shadow-defence-950/60 transition-all hover:scale-[1.01]"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Start Test</span>
-                    </Link>
+                    <div className="space-y-2">
+                      <Link
+                        to={`/cadet/instructions/${test.id}`}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-defence-600 to-defence-500 hover:from-defence-500 hover:to-defence-400 text-white font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 shadow-lg shadow-defence-950/60 transition-all hover:scale-[1.01]"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" />
+                        <span>Start Test</span>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/cadet/instructions/${test.id}`;
+                          navigator.clipboard.writeText(url);
+                          showToast('success', 'Test Link Copied', `Direct test link copied to clipboard!`);
+                        }}
+                        className="w-full py-1.5 rounded-xl text-slate-400 hover:text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 hover:bg-navy-850 transition-all"
+                      >
+                        <Link2 className="w-3 h-3 text-gold-400" />
+                        <span>Copy Direct Link</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

@@ -17,6 +17,7 @@ import { AdminLoginPage } from './pages/public/AdminLoginPage';
 // Cadet Pages
 import { CadetDashboard } from './pages/cadet/CadetDashboard';
 import { MockTestList } from './pages/cadet/MockTestList';
+import { CadetPackagesPage } from './pages/cadet/CadetPackagesPage';
 import { TestInstructions } from './pages/cadet/TestInstructions';
 import { LiveExamPage } from './pages/cadet/LiveExamPage';
 import { ResultPage } from './pages/cadet/ResultPage';
@@ -34,6 +35,7 @@ import { CadetDatasetPage } from './pages/admin/CadetDatasetPage';
 import { TestManagementPage } from './pages/admin/TestManagementPage';
 import { QuestionBankPage } from './pages/admin/QuestionBankPage';
 import { AddQuestionPage } from './pages/admin/AddQuestionPage';
+import { PackageManagement } from './pages/admin/PackageManagement';
 import { AccessControlPage } from './pages/admin/AccessControlPage';
 import { AdminResultsPage } from './pages/admin/AdminResultsPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
@@ -63,6 +65,7 @@ export const App: React.FC = () => {
                   <Route index element={<Navigate to="/cadet/dashboard" replace />} />
                   <Route path="dashboard" element={<CadetDashboard />} />
                   <Route path="mock-tests" element={<MockTestList />} />
+                  <Route path="packages" element={<CadetPackagesPage />} />
                   <Route path="instructions/:testId" element={<TestInstructions />} />
                   <Route path="history" element={<TestHistoryPage />} />
                   <Route path="results" element={<ResultPage />} />
@@ -83,6 +86,7 @@ export const App: React.FC = () => {
                   <Route path="tests" element={<TestManagementPage />} />
                   <Route path="question-bank" element={<QuestionBankPage />} />
                   <Route path="add-questions" element={<AddQuestionPage />} />
+                  <Route path="packages" element={<PackageManagement />} />
                   <Route path="access-control" element={<AccessControlPage />} />
                   <Route path="results" element={<AdminResultsPage />} />
                   <Route path="analytics" element={<AdminAnalyticsPage />} />

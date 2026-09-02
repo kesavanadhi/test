@@ -14,6 +14,7 @@ import {
   Clock,
   Shield,
   FileSpreadsheet,
+  Package,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { formatDate } from '../../utils/formatters';
@@ -61,6 +62,13 @@ export const AdminDashboard: React.FC = () => {
 
 
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to="/admin/packages"
+            className="px-5 py-3 rounded-xl bg-navy-900 hover:bg-navy-850 text-slate-200 border border-slate-700 font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all hover:border-gold-500/40"
+          >
+            <Package className="w-4 h-4 text-gold-400" />
+            <span>Manage Packages</span>
+          </Link>
           <Link
             to="/admin/dataset"
             className="px-5 py-3 rounded-xl bg-navy-900 hover:bg-navy-850 text-slate-200 border border-slate-700 font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all"

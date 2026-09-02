@@ -12,6 +12,7 @@ import {
   Target,
   BarChart3,
   Calendar,
+  Package,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
@@ -111,6 +112,13 @@ export const CadetDashboard: React.FC = () => {
             >
               <Zap className="w-4 h-4 text-gold-400" />
               <span>Start Mock Test</span>
+            </Link>
+            <Link
+              to="/cadet/packages"
+              className="px-5 py-3.5 rounded-xl bg-navy-950/80 hover:bg-navy-900 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-2"
+            >
+              <Package className="w-4 h-4 text-defence-400" />
+              <span>Test Packages ({currentCadet?.packageName || 'Standard'})</span>
             </Link>
             <Link
               to="/cadet/leaderboard"
