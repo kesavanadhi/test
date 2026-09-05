@@ -1023,5 +1023,36 @@ export const initialQuestions: Question[] = [
     "negativeMarks": 1,
     "explanation": "Ground duty % = 100 - (65 + 20) = 15%. Number of cadets = 15% of 120 = 18 cadets.",
     "createdAt": "2024-01-10T12:50:00Z"
+  },
+  {
+    "id": "Q-CDS-GK-041",
+    "exam": "CDS",
+    "subject": "General Knowledge",
+    "topic": "General Science - Physics",
+    "difficulty": "Easy",
+    "text": "What is the speed of light approximately?",
+    "options": [
+      {
+        "id": "A",
+        "text": "3 × 10^6 m/s"
+      },
+      {
+        "id": "B",
+        "text": "3 × 10^7 m/s"
+      },
+      {
+        "id": "C",
+        "text": "3 × 10^8 m/s"
+      },
+      {
+        "id": "D",
+        "text": "3 × 10^9 m/s"
+      }
+    ],
+    "correctAnswer": "C",
+    "marks": 1,
+    "negativeMarks": 0.33,
+    "explanation": "The speed of light in vacuum is approximately 3 × 10^8 m/s (precisely 299,792,458 m/s).",
+    "createdAt": "2024-01-10T13:00:00Z"
   }
 ];

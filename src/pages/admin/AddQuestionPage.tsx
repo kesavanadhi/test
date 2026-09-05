@@ -495,14 +495,17 @@ The Siachen Glacier is situated in which mountain range? / Pir Panjal / Karakora
               </div>
 
               <p className="text-xs text-slate-400 leading-relaxed">
-                Use <code className="text-defence-400 font-bold bg-navy-950 px-1 py-0.5 rounded">/</code> to separate the question and four options.
+                Use <code className="text-defence-400 font-bold bg-navy-950 px-1 py-0.5 rounded"> / </code> (with spaces) or <code className="text-defence-400 font-bold bg-navy-950 px-1 py-0.5 rounded">|</code> to separate the question, 4 options, and optional answer key.
+                <span className="text-defence-300 font-semibold block mt-1">
+                  💡 Units with slashes (<code className="font-mono text-gold-400">m/s</code>, <code className="font-mono text-gold-400">km/h</code>, <code className="font-mono text-gold-400">m/s²</code>) and fractions (<code className="font-mono text-gold-400">1/2</code>) are automatically preserved!
+                </span>
               </p>
 
               <textarea
                 rows={4}
                 value={slashInput}
                 onChange={(e) => setSlashInput(e.target.value)}
-                placeholder="Which Article deals with Fundamental Rights? / Article 12-35 / Article 36-51 / Article 52-78 / Article 79-122"
+                placeholder="What is the speed of light approximately? / 3 × 10^6 m/s / 3 × 10^7 m/s / 3 × 10^8 m/s / 3 × 10^9 m/s / C"
                 className="w-full p-4 rounded-2xl bg-navy-950 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-defence-500 font-mono leading-relaxed"
               />
 
@@ -510,7 +513,7 @@ The Siachen Glacier is situated in which mountain range? / Pir Panjal / Karakora
               {parsedSingle.isValid ? (
                 <div className="p-3 rounded-xl bg-defence-950/70 border border-defence-500/40 text-defence-300 text-xs flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-defence-400 shrink-0" />
-                  <span>Valid Question Syntax (Question + 4 Options Detected)</span>
+                  <span>Valid Question Syntax (Question + 4 Options Detected · Key: {parsedSingle.correctAnswer})</span>
                 </div>
               ) : (
                 <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-start gap-2">
@@ -542,15 +545,20 @@ The Siachen Glacier is situated in which mountain range? / Pir Panjal / Karakora
                 </span>
               </div>
 
-              <p className="text-xs text-slate-400">
-                Paste multiple lines. Each line must follow: <code className="text-defence-400 font-bold">Question / Option A / Option B / Option C / Option D</code>
-              </p>
+              <div className="space-y-1 text-xs text-slate-400">
+                <p>
+                  Paste multiple lines. Format: <code className="text-defence-400 font-bold">Question / Option A / Option B / Option C / Option D / [Optional Key]</code>
+                </p>
+                <p className="text-defence-300">
+                  💡 Units with slashes (<code className="font-mono text-gold-400">m/s</code>, <code className="font-mono text-gold-400">km/h</code>), fractions (<code className="font-mono text-gold-400">1/2</code>), and pipe delimiters (<code className="font-mono text-gold-400">|</code>) are automatically supported!
+                </p>
+              </div>
 
               <textarea
                 rows={7}
                 value={bulkInput}
                 onChange={(e) => setBulkInput(e.target.value)}
-                placeholder="What is capital of India? / Chennai / Mumbai / New Delhi / Kolkata&#10;2 + 2 = ? / 3 / 4 / 5 / 6"
+                placeholder="What is the speed of light approximately? / 3 × 10^6 m/s / 3 × 10^7 m/s / 3 × 10^8 m/s / 3 × 10^9 m/s / C&#10;What is capital of India? / Chennai / Mumbai / New Delhi / Kolkata / C&#10;2 + 2 = ? / 3 / 4 / 5 / 6 / B"
                 className="w-full p-4 rounded-2xl bg-navy-950 border border-slate-700 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-defence-500 font-mono leading-relaxed custom-scrollbar"
               />
 
