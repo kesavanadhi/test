@@ -51,10 +51,6 @@ export const Navbar: React.FC = () => {
             <Link to="/cadet/mock-tests" className="hover:text-white transition-colors">
               Mock Tests
             </Link>
-            <Link to="/cadet/packages" className="hover:text-defence-400 transition-colors flex items-center gap-1">
-              <span>Packages</span>
-              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-defence-500/20 text-defence-400 border border-defence-500/30">NEW</span>
-            </Link>
             <Link to="/cadet/leaderboard" className="hover:text-white transition-colors">
               Leaderboard
             </Link>
@@ -130,10 +126,6 @@ export const Navbar: React.FC = () => {
             </Link>
             <Link to="/cadet/mock-tests" onClick={() => setMobileMenuOpen(false)} className="hover:text-white">
               Mock Tests
-            </Link>
-            <Link to="/cadet/packages" onClick={() => setMobileMenuOpen(false)} className="hover:text-defence-400 flex items-center justify-between">
-              <span>Test Packages</span>
-              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-defence-500/20 text-defence-400 border border-defence-500/30">NEW</span>
             </Link>
             <Link to="/cadet/leaderboard" onClick={() => setMobileMenuOpen(false)} className="hover:text-white">
               National Leaderboard

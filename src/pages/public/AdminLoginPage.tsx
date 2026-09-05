@@ -112,6 +112,21 @@ export const AdminLoginPage: React.FC = () => {
             <span>Authenticate Admin Session</span>
             <ArrowRight className="w-4 h-4" />
           </button>
+
+          <div className="pt-2 border-t border-slate-800/80 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setAdminId('NCC');
+                setPassword('Ncc@2023');
+                setErrorMessage(null);
+              }}
+              className="text-[11px] text-amber-400/90 hover:text-amber-300 transition-colors inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-amber-950/40 border border-amber-500/30 font-mono"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Fill Credentials: NCC / Ncc@2023</span>
+            </button>
+          </div>
         </form>
 
         <div className="text-center">

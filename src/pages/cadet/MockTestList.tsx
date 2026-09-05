@@ -16,7 +16,6 @@ import {
   ShieldAlert,
   Link2,
   Share2,
-  Package,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -272,15 +271,8 @@ export const MockTestList: React.FC = () => {
                         <span>Paper Locked</span>
                       </div>
                       <p className="text-[10px] text-slate-500">
-                        Access is restricted for your current package tier or account.
+                        Access is restricted for your account. Please contact Administrator.
                       </p>
-                      <Link
-                        to="/cadet/packages"
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-defence-400 hover:underline pt-1"
-                      >
-                        <Package className="w-3.5 h-3.5" />
-                        <span>Explore / Upgrade Packages</span>
-                      </Link>
                     </div>
                   ) : (
                     <div className="space-y-2">

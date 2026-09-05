@@ -250,7 +250,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Admin Login (NCC / Ncc@2023)
   const loginAdmin = (adminId: string, password: string) => {
-    if (adminId.trim() === 'NCC' && password === 'Ncc@2023') {
+    if (adminId.trim().toUpperCase() === 'NCC' && password.trim() === 'Ncc@2023') {
       setIsAdminAuthenticated(true);
       StorageService.saveAdminAuth(true);
     } else {
