@@ -55,18 +55,18 @@
 ## 🔐 Default Access Credentials
 
 ### Officer Admin Portal
-* **Login URL**: `/admin/login`
+* **Login URL**: 
 * **Primary Admin**:
-  * **Admin ID**: `Ak57` *(or `kesavanadhi2005@gmail.com`)*
-  * **Password**: `Kesavan@2005`
+  * **Admin ID**: 
+  * **Password**: 
 * **Alternate Admin**:
-  * **Admin ID**: `NCC`
-  * **Password**: `Ncc@2023`
+  * **Admin ID**: 
+  * **Password**: 
 
 ### Cadet Candidate Portal
-* **Login URL**: `/cadet/login`
-* **Default Cadet IDs**: `NCC20260001`, `NCC20260002`, `NCC20260003` (or register a new cadet)
-* **Default Password**: `Password@123`
+* **Login URL**: 
+* **Default Cadet IDs**: 
+* **Default Password**: 
 
 ---
 
