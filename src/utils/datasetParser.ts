@@ -187,57 +187,69 @@ export function mergeImportedCadets(
 }
 
 /**
- * Export helpers: CSV, Excel, JSON
+ * Export helpers: CSV, Excel, JSON with full cadet registration details
  */
-export function exportCadetsToCSV(cadets: Cadet[]) {
+export function exportCadetsToCSV(cadets: Cadet[], fileName = 'cadet_master_dataset.csv') {
   const worksheet = XLSX.utils.json_to_sheet(
     cadets.map((c) => ({
       'Cadet ID': c.cadetId,
-      'Name': c.name,
+      'Full Name': c.name,
       'Email': c.email,
-      'Phone': c.phone,
-      'College': c.college,
-      'Department': c.department,
-      'Year': c.year,
+      'Mobile Phone': c.phone,
+      'Gender': c.gender || 'Male',
+      'Date of Birth': c.dateOfBirth || '',
+      'College / Institution': c.college,
+      'Department / Branch': c.department,
+      'Academic Year': c.year,
       'University': c.university,
-      'Register Number': c.registerNumber,
-      'NCC Unit': c.nccUnit,
+      'College Register Number': c.registerNumber,
+      'NCC Unit / Battalion': c.nccUnit || '1 (TN) CTC NCC',
       'Target Exam': c.targetExam || 'Both',
-      'Status': c.status,
+      'Account Status': c.status,
+      'Tests Completed': c.testsCompleted || 0,
+      'Average Score (%)': c.averageScore || 0,
+      'Highest Score (%)': c.highestScore || c.bestScore || 0,
+      'National Rank': c.rank ? `#${c.rank}` : '-',
       'Registration Date': c.registrationDate,
     }))
   );
 
   const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
-  downloadBlob(csvOutput, 'cadet_master_dataset.csv', 'text/csv;charset=utf-8;');
+  downloadBlob(csvOutput, fileName, 'text/csv;charset=utf-8;');
 }
 
-export function exportCadetsToExcel(cadets: Cadet[]) {
+export function exportCadetsToExcel(cadets: Cadet[], fileName = 'cadet_master_dataset.xlsx') {
   const worksheet = XLSX.utils.json_to_sheet(
     cadets.map((c) => ({
       'Cadet ID': c.cadetId,
-      'Name': c.name,
+      'Full Name': c.name,
       'Email': c.email,
-      'Phone': c.phone,
-      'College': c.college,
-      'Department': c.department,
-      'Year': c.year,
+      'Mobile Phone': c.phone,
+      'Gender': c.gender || 'Male',
+      'Date of Birth': c.dateOfBirth || '',
+      'College / Institution': c.college,
+      'Department / Branch': c.department,
+      'Academic Year': c.year,
       'University': c.university,
-      'Register Number': c.registerNumber,
-      'NCC Unit': c.nccUnit,
+      'College Register Number': c.registerNumber,
+      'NCC Unit / Battalion': c.nccUnit || '1 (TN) CTC NCC',
       'Target Exam': c.targetExam || 'Both',
-      'Status': c.status,
+      'Account Status': c.status,
+      'Tests Completed': c.testsCompleted || 0,
+      'Average Score (%)': c.averageScore || 0,
+      'Highest Score (%)': c.highestScore || c.bestScore || 0,
+      'National Rank': c.rank ? `#${c.rank}` : '-',
       'Registration Date': c.registrationDate,
     }))
   );
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Cadets');
-  XLSX.writeFile(workbook, 'cadet_master_dataset.xlsx');
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Cadet Details');
+  XLSX.writeFile(workbook, fileName);
 }
 
-export function exportCadetsToJSON(cadets: Cadet[]) {
+export function exportCadetsToJSON(cadets: Cadet[], fileName = 'cadet_master_dataset.json') {
   const jsonStr = JSON.stringify(cadets, null, 2);
-  downloadBlob(jsonStr, 'cadet_master_dataset.json', 'application/json');
+  downloadBlob(jsonStr, fileName, 'application/json');
 }
 
 export function downloadSampleCSV() {
