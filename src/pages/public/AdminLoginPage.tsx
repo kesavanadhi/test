@@ -9,7 +9,6 @@ import {
   Shield,
   AlertCircle,
   Sparkles,
-  KeyRound,
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -76,7 +75,7 @@ export const AdminLoginPage: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder="Enter Admin ID (e.g. NCC)"
+                placeholder="Enter Admin ID (e.g. Ak57)"
                 value={adminId}
                 onChange={(e) => setAdminId(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-navy-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono font-bold"
@@ -112,21 +111,6 @@ export const AdminLoginPage: React.FC = () => {
             <span>Authenticate Admin Session</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-
-          <div className="pt-2 border-t border-slate-800/80 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setAdminId('NCC');
-                setPassword('Ncc@2023');
-                setErrorMessage(null);
-              }}
-              className="text-[11px] text-amber-400/90 hover:text-amber-300 transition-colors inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-amber-950/40 border border-amber-500/30 font-mono"
-            >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Fill Credentials: NCC / Ncc@2023</span>
-            </button>
-          </div>
         </form>
 
         <div className="text-center">

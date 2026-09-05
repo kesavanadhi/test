@@ -47,7 +47,7 @@ export const Topbar: React.FC<TopbarProps> = ({ role, setMobileOpen }) => {
           <p className="text-[11px] text-slate-400">
             {role === 'cadet'
               ? `Aspirant: ${cadetUser?.name || 'Cadet'} • ID: ${cadetUser?.cadetId || 'NCC2026'}`
-              : 'Master Officer Session (Authenticated ID: NCC)'}
+              : 'Master Officer Session (Officer Command Portal)'}
           </p>
         </div>
       </div>
@@ -117,7 +117,7 @@ export const Topbar: React.FC<TopbarProps> = ({ role, setMobileOpen }) => {
               {role === 'cadet' ? cadetUser?.name : 'Administrator'}
             </p>
             <span className="text-[10px] font-mono text-defence-400 font-semibold">
-              {role === 'cadet' ? cadetUser?.cadetId : 'NCC Admin'}
+              {role === 'cadet' ? cadetUser?.cadetId : 'Officer Admin'}
             </span>
           </div>
         </div>

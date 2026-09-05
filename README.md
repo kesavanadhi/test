@@ -56,9 +56,12 @@
 
 ### Officer Admin Portal
 * **Login URL**: `/admin/login`
-* **Admin ID**: `NCC` *(case-insensitive: `NCC`, `Ncc`, `ncc`)*
-* **Password**: `Ncc@2023`
-* *(A quick **"Fill Credentials"** button is also provided directly on the admin login card)*
+* **Primary Admin**:
+  * **Admin ID**: `Ak57` *(or `kesavanadhi2005@gmail.com`)*
+  * **Password**: `Kesavan@2005`
+* **Alternate Admin**:
+  * **Admin ID**: `NCC`
+  * **Password**: `Ncc@2023`
 
 ### Cadet Candidate Portal
 * **Login URL**: `/cadet/login`

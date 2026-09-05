@@ -248,9 +248,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     StorageService.saveCadetAuth(null);
   };
 
-  // Admin Login (NCC / Ncc@2023)
+  // Admin Login (supports Ak57 / Kesavan@2005, and NCC / Ncc@2023)
   const loginAdmin = (adminId: string, password: string) => {
-    if (adminId.trim().toUpperCase() === 'NCC' && password.trim() === 'Ncc@2023') {
+    const cleanId = adminId.trim().toLowerCase();
+    const cleanPass = password.trim();
+
+    const isAuthorized =
+      ((cleanId === 'ak57' || cleanId === 'kesavanadhi2005@gmail.com') && cleanPass === 'Kesavan@2005') ||
+      (cleanId === 'ncc' && cleanPass === 'Ncc@2023');
+
+    if (isAuthorized) {
       setIsAdminAuthenticated(true);
       StorageService.saveAdminAuth(true);
     } else {
